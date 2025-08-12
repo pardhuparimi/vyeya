@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+
+pnpm:
+  nohoist:
+    - '@babel/runtime'
+    - '@babel/runtime/**'

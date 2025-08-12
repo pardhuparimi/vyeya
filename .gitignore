@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+packages/*/node_modules/
+
+# Build outputs
+packages/app/android/build/
+packages/app/ios/build/
+packages/server/dist/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Docker
+.docker/
+
+# Metro
+.metro-health-check*
+
+# React Native
+packages/app/ios/Pods/
+packages/app/ios/Podfile.lock
