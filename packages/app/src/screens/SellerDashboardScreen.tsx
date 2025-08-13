@@ -4,9 +4,10 @@ import tw from 'twrnc';
 import ProductList from '../components/ProductList';
 import { IProduct } from '../../../shared/src';
 import { getProducts } from '../services/product.service';
+import { useAuth } from '../context/AuthContext';
 
 const SellerDashboardScreen = ({ navigation }: any) => {
-
+  const { user, logout } = useAuth();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +33,10 @@ const SellerDashboardScreen = ({ navigation }: any) => {
 
   return (
     <View style={tw`flex-1 pt-12`}>
-      <Text style={tw`text-2xl font-bold mb-4 text-center`}>Seller Dashboard</Text>
+      <View style={tw`flex-row justify-between items-center px-4 mb-4`}>
+        <Text style={tw`text-2xl font-bold`}>Welcome, {user?.name}</Text>
+        <Button title="Logout" onPress={logout} color="red" />
+      </View>
       <Button title="Add Product" onPress={() => navigation.navigate('AddProduct')} />
       {isLoading ? (
         <Text style={tw`text-center`}>Loading products...</Text>

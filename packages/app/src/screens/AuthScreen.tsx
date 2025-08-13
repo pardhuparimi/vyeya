@@ -1,74 +1,73 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
-import { useTailwind } from 'twrnc';
-import { signUp, signIn } from '../services/auth.service';
+import { View, Text, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
+import tw from 'twrnc';
+import { useAuth } from '../context/AuthContext';
 
 const AuthScreen = () => {
-  const tailwind = useTailwind();
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSigningUp, setIsSigningUp] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('seller@vyeya.com');
+  const [password, setPassword] = useState('password');
+  const [name, setName] = useState('');
+  const [isSignup, setIsSignup] = useState(false);
+  const { login, signup, isLoading } = useAuth();
 
   const handleAuth = async () => {
-    setIsLoading(true);
     try {
-      if (isSigningUp) {
-        await signUp(email, password, phone);
-        Alert.alert('Success', 'Please check your email to confirm your account.');
+      if (isSignup) {
+        if (!name.trim()) {
+          Alert.alert('Error', 'Name is required');
+          return;
+        }
+        await signup(email, password, name);
       } else {
-        const session = await signIn(email, password);
-        Alert.alert('Success', 'Signed in successfully.');
-        console.log('ID Token: ' + session.getIdToken().getJwtToken());
+        await login(email, password);
       }
     } catch (error) {
-      Alert.alert('Error', (error as Error).message);
-    } finally {
-      setIsLoading(false);
+      Alert.alert('Error', isSignup ? 'Signup failed' : 'Login failed');
     }
   };
 
   return (
-    <View style={tailwind`flex-1 justify-center items-center p-4`}>
-      <Text style={tailwind`text-2xl font-bold mb-4`}>
-        {isSigningUp ? 'Sign Up' : 'Sign In'}
-      </Text>
+    <View style={tw`flex-1 justify-center items-center p-4`}>
+      <Text style={tw`text-2xl font-bold mb-4`}>{isSignup ? 'Sign Up' : 'Login'} to Vyeya</Text>
+      
+      {isSignup && (
+        <TextInput
+          style={tw`w-full border border-gray-300 rounded-md p-2 mb-2`}
+          placeholder="Full Name"
+          value={name}
+          onChangeText={setName}
+        />
+      )}
+      
       <TextInput
-        style={tailwind`w-full border border-gray-300 rounded-md p-2 mb-2`}
+        style={tw`w-full border border-gray-300 rounded-md p-2 mb-2`}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      {isSigningUp && (
-        <TextInput
-          style={tailwind`w-full border border-gray-300 rounded-md p-2 mb-2`}
-          placeholder="Phone"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-      )}
       <TextInput
-        style={tailwind`w-full border border-gray-300 rounded-md p-2 mb-4`}
+        style={tw`w-full border border-gray-300 rounded-md p-2 mb-4`}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
       <Button
-        title={isLoading ? 'Loading...' : (isSigningUp ? 'Sign Up' : 'Sign In')}
+        title={isLoading ? (isSignup ? 'Signing up...' : 'Logging in...') : (isSignup ? 'Sign Up' : 'Login')}
         onPress={handleAuth}
         disabled={isLoading}
       />
-      <View style={tailwind`mt-4`}>
-        <Button
-          title={isSigningUp ? 'Switch to Sign In' : 'Switch to Sign Up'}
-          onPress={() => setIsSigningUp(!isSigningUp)}
-        />
-      </View>
+      
+      <TouchableOpacity 
+        style={tw`mt-4`}
+        onPress={() => setIsSignup(!isSignup)}
+      >
+        <Text style={tw`text-blue-500`}>
+          {isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
