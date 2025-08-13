@@ -1,140 +1,158 @@
-# Vyeya Development Setup Guide
+# Vyeya Setup Guide
 
-This guide provides step-by-step instructions for setting up the Vyeya development environment.
+## Prerequisites
 
-## Quick Start Checklist
+### Required Software
+- **[Node.js](https://nodejs.org/)** (v22 or later)
+- **[pnpm](https://pnpm.io/installation)** (v8 or later)
+- **[Git](https://git-scm.com/)**
+- **[Docker](https://www.docker.com/get-started)** (for database)
 
-- [ ] Node.js v18+ installed
-- [ ] pnpm installed
-- [ ] Git installed
-- [ ] Xcode installed (macOS only)
-- [ ] Android Studio installed
-- [ ] Repository cloned
-- [ ] Dependencies installed
-- [ ] iOS pods installed (macOS only)
-- [ ] Emulators/simulators set up
+### For Mobile Development
 
-## Detailed Setup Instructions
+#### Android Development
+- **[Android Studio](https://developer.android.com/studio)** (latest version)
+- **Android SDK** (API level 34 or higher)
+- **Android Virtual Device (AVD)** or physical Android device
+- **Java Development Kit (JDK)** 17 or higher
 
-### 1. System Requirements
+#### iOS Development (macOS only)
+- **[Xcode](https://developer.apple.com/xcode/)** (latest version)
+- **Xcode Command Line Tools**: `xcode-select --install`
+- **iOS Simulator** (included with Xcode)
+- **CocoaPods**: `sudo gem install cocoapods`
 
-#### macOS
+### Optional
+- **[Watchman](https://facebook.github.io/watchman/)** (recommended for better file watching)
+
+## Installation
+
+### 1. Clone Repository
 ```bash
-# Check versions
-node --version    # Should be v22+
-pnpm --version    # Should be v8+
-xcode-select -p   # Should show Xcode path
-```
-
-#### Windows/Linux
-```bash
-# Check versions
-node --version    # Should be v22+
-pnpm --version    # Should be v8+
-```
-
-### 2. Install Required Software
-
-#### Node.js and pnpm
-```bash
-# Install Node.js from https://nodejs.org/
-# Then install pnpm
-npm install -g pnpm
-```
-
-#### Xcode (macOS only)
-1. Install from Mac App Store
-2. Install Command Line Tools:
-```bash
-xcode-select --install
-```
-
-#### Android Studio
-1. Download from https://developer.android.com/studio
-2. Install Android SDK Platform 34
-3. Set up environment variables:
-
-**macOS/Linux:**
-```bash
-echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.zshrc
-source ~/.zshrc
-```
-
-**Windows:**
-```cmd
-setx ANDROID_HOME "%USERPROFILE%\AppData\Local\Android\Sdk"
-setx PATH "%PATH%;%ANDROID_HOME%\emulator;%ANDROID_HOME%\platform-tools"
-```
-
-### 3. Clone and Setup Project
-
-```bash
-# Clone repository
 git clone <repository-url>
 cd Vyeya
+```
 
-# Install all dependencies
+### 2. Install Dependencies
+```bash
 pnpm install
+```
 
-# Install iOS dependencies (macOS only)
+### 3. Environment Setup
+
+#### React Native Environment
+Follow the [React Native CLI Quickstart](https://reactnative.dev/docs/environment-setup) guide for your operating system.
+
+**For macOS (iOS + Android):**
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install required tools
+brew install node watchman
+brew install --cask android-studio
+
+# Install CocoaPods
+sudo gem install cocoapods
+```
+
+#### iOS Setup (macOS only)
+```bash
 cd packages/app/ios
 pod install
-cd ../../..
+cd ../..
 ```
 
-### 4. Set Up Emulators/Simulators
+## Running the Application
 
-#### iOS Simulator (macOS only)
+### Essential Steps
+
+1. **Start Database**
 ```bash
-# Open Xcode and install iOS simulators
-# Or use command line
-xcrun simctl list devices
+docker compose up -d
 ```
 
-#### Android Emulator
+2. **Start Backend Server**
 ```bash
-# Create AVD in Android Studio or via command line
-avdmanager create avd -n Vyeya_Emulator -k "system-images;android-34;google_apis;x86_64"
-
-# Start emulator
-emulator -avd Vyeya_Emulator
+cd packages/server && npm run dev
 ```
 
-### 5. Verify Setup
-
-#### Test Backend
+3. **Run Mobile App**
 ```bash
-cd packages/server
-pnpm dev
-# Should start on http://localhost:3000
+cd packages/app && npm run android
 ```
 
-#### Test Mobile App
+> **Note**: If you get connection errors, run: `adb reverse tcp:3000 tcp:3000`
+
+## Test Authentication
+
+- **Existing User**: `seller@vyeya.com` / `password`
+- **New Users**: Use signup form with unique email addresses
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. "Cannot connect to Metro" Error
+```bash
+# Kill existing Metro process and restart
+kill -9 $(lsof -ti:8081) 2>/dev/null || true
+cd packages/app
+npx react-native start --reset-cache
+
+# In another terminal, setup port forwarding
+adb reverse tcp:8081 tcp:8081
+```
+
+#### 2. "Signup/Login Failed" - Network Issues
+```bash
+# Ensure port forwarding is set up
+adb reverse tcp:3000 tcp:3000
+
+# Test server connectivity
+curl -X GET http://localhost:3000/health
+
+# Check if emulator is connected
+adb devices
+```
+
+#### 3. Database Connection Issues
+```bash
+# Restart database containers
+docker compose down
+docker compose up -d
+
+# Wait for containers to be healthy
+docker ps
+```
+
+#### 4. "User already exists" Error
+```bash
+# Use different email addresses for testing
+# Or check existing users in database:
+docker exec -i vyeya-postgres psql -U postgres -d vyeya -c "SELECT email FROM users;"
+```
+
+#### 5. Android Emulator Not Starting
+```bash
+# Check available emulators
+~/Library/Android/sdk/emulator/emulator -list-avds
+
+# Kill existing emulator processes
+killall qemu-system-aarch64 2>/dev/null || true
+
+# Start fresh emulator
+~/Library/Android/sdk/emulator/emulator -avd YOUR_AVD_NAME
+```
+
+#### 6. Metro Cache Issues
 ```bash
 cd packages/app
-
-# iOS (macOS only)
-npx react-native run-ios
-
-# Android
-npx react-native run-android
-```
-
-## Common Setup Issues and Solutions
-
-### Issue: Metro bundler fails to start
-```bash
-# Solution
-cd packages/app
-rm -rf node_modules/.cache
 npx react-native start --reset-cache
 ```
 
-### Issue: iOS build fails
+#### 7. iOS Build Issues (macOS only)
 ```bash
-# Solution
 cd packages/app/ios
 rm -rf Pods Podfile.lock
 pod install
@@ -142,189 +160,8 @@ cd ..
 npx react-native run-ios
 ```
 
-### Issue: Android build fails
+#### 8. JWT Token Issues
 ```bash
-# Solution
-cd packages/app/android
-./gradlew clean
-cd ..
-npx react-native run-android
+# Clear app storage and restart
+# On Android: Settings > Apps > Vyeya > Storage > Clear Data
 ```
-
-### Issue: Babel runtime error
-```bash
-# Solution
-cd packages/app
-npm install @babel/runtime
-npx react-native start --reset-cache
-```
-
-### Issue: Navigation errors
-```bash
-# Solution: Ensure gesture handler is imported first
-# In packages/app/index.js:
-import 'react-native-gesture-handler';
-```
-
-## Development Workflow
-
-### Starting Development
-1. Start backend server:
-```bash
-pnpm --filter server dev
-```
-
-2. Start mobile app:
-```bash
-# iOS
-pnpm --filter app ios
-
-# Android
-pnpm --filter app android
-```
-
-### Making Changes
-1. Backend changes: Server auto-reloads
-2. Mobile changes: Use Fast Refresh (Cmd+R to reload)
-
-### Debugging
-1. Enable debugging in app (Cmd+D on iOS, Cmd+M on Android)
-2. Use React Native Debugger or browser dev tools
-3. Check Metro bundler logs for JavaScript errors
-
-## Environment Variables
-
-Create `.env` files in respective packages:
-
-### packages/server/.env
-```
-NODE_ENV=development
-PORT=3000
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
-AWS_REGION=us-east-1
-```
-
-### packages/app/.env
-```
-API_URL=http://localhost:3000
-```
-
-## Testing
-
-### Run Tests
-```bash
-# All packages
-pnpm test
-
-# Specific package
-pnpm --filter app test
-pnpm --filter server test
-```
-
-### Linting
-```bash
-# All packages
-pnpm lint
-
-# Specific package
-pnpm --filter app lint
-```
-
-## Production Build
-
-### Mobile App
-```bash
-cd packages/app
-
-# iOS
-npx react-native run-ios --configuration Release
-
-# Android
-npx react-native run-android --variant=release
-```
-
-### Backend
-```bash
-cd packages/server
-pnpm build
-pnpm start
-```
-
-## Useful Commands
-
-### pnpm Workspace Commands
-```bash
-# Install dependency to specific package
-pnpm --filter app add react-native-vector-icons
-pnpm --filter server add express
-
-# Run script in specific package
-pnpm --filter app ios
-pnpm --filter server dev
-
-# Run script in all packages
-pnpm -r test
-```
-
-### React Native Commands
-```bash
-# Reset Metro cache
-npx react-native start --reset-cache
-
-# Clean builds
-npx react-native clean
-
-# Check React Native setup
-npx react-native doctor
-
-# List devices
-npx react-native run-ios --list-devices
-npx react-native run-android --list-devices
-```
-
-### Android Commands
-```bash
-# List emulators
-emulator -list-avds
-
-# Start emulator
-emulator -avd <emulator-name>
-
-# Check connected devices
-adb devices
-
-# View logs
-adb logcat
-```
-
-### iOS Commands
-```bash
-# List simulators
-xcrun simctl list devices
-
-# Boot simulator
-xcrun simctl boot <device-id>
-
-# View logs
-xcrun simctl spawn booted log stream --predicate 'process == "Vyeya"'
-```
-
-## Support
-
-If you encounter issues:
-
-1. Check this setup guide
-2. Review the troubleshooting section in README.md
-3. Check React Native documentation
-4. Search existing issues in the repository
-5. Create a new issue with detailed error information
-
-## Next Steps
-
-After successful setup:
-
-1. Explore the codebase structure
-2. Review the API documentation
-3. Check out the development workflow
-4. Start contributing!
