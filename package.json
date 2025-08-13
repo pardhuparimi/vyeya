@@ -1,8 +1,10 @@
 {
-	"dependencies": {
-		"@babel/runtime": "^7.28.2"
-	},
-	"devDependencies": {
-		"@react-native-community/cli": "^20.0.0"
+	"name": "vyeya-monorepo",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"clean": "rm -rf node_modules packages/*/node_modules"
 	}
 }

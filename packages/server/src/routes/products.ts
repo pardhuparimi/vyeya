@@ -44,32 +44,44 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/v1/products/:id
-router.get('/:id', (req, res) => {
-  const product = mockProducts.find(p => p.id === req.params.id);
-  
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await ProductModel.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json(product);
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  
-  res.json(product);
 });
 
 // POST /api/v1/products
-router.post('/', (req, res) => {
-  const { name, price, stock, store_id, location, category_id } = req.body;
-  
-  const newProduct = {
-    id: Date.now().toString(),
-    store_id,
-    name,
-    price: parseFloat(price),
-    stock: parseInt(stock),
-    location,
-    category_id
-  };
-  
-  mockProducts.push(newProduct);
-  res.status(201).json(newProduct);
+router.post('/', async (req, res) => {
+  try {
+    const { name, price, stock, store_id, location, category_id } = req.body;
+    
+    if (!name || !price || !stock || !store_id || !category_id) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    const product = await ProductModel.create({
+      name,
+      price: parseFloat(price),
+      stock: parseInt(stock),
+      store_id,
+      location: location || { lat: 40.7128, lng: -74.0060 },
+      category_id
+    });
+    
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
 });
 
 export { router as productRoutes };

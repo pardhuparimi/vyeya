@@ -15,9 +15,79 @@ This repository contains the source code for the Vyeya mobile application and it
 -   **Frontend**: React Native with TypeScript, Tailwind RN for styling, React Navigation
 -   **Backend**: Node.js with Express.js, TypeScript
 -   **Database**: PostgreSQL with Redis for caching
--   **Cloud**: AWS (EC2, S3, RDS, etc.)
--   **Authentication**: AWS Cognito
+-   **Authentication**: JWT tokens with bcrypt password hashing
 -   **Package Manager**: pnpm with workspaces
+
+## Current Features ✅
+
+### Authentication & Security
+- ✅ JWT-based authentication with secure token generation
+- ✅ bcrypt password hashing for secure password storage
+- ✅ Token persistence using AsyncStorage
+- ✅ Protected routes with authentication middleware
+- ✅ Login/logout functionality with proper state management
+
+### Mobile Application
+- ✅ React Native app with TypeScript
+- ✅ Conditional navigation (login screen → dashboard)
+- ✅ Authentication context with persistent sessions
+- ✅ Seller dashboard with product management
+- ✅ Add product functionality with form validation
+
+### Backend API
+- ✅ Express.js server with TypeScript
+- ✅ RESTful API endpoints for authentication
+- ✅ JWT middleware for route protection
+- ✅ Input validation and error handling
+- ✅ PostgreSQL database integration
+- ✅ Product CRUD operations
+
+### Database
+- ✅ PostgreSQL database with Docker setup
+- ✅ Database models and schema
+- ✅ Sample data initialization
+- ✅ Product management with database persistence
+
+## Architecture Progress
+
+### ✅ Phase 1: Authentication & Security (COMPLETED)
+- JWT token-based authentication
+- Secure password hashing with bcrypt
+- Token persistence and session management
+- Protected API routes
+- Input validation and sanitization
+
+### 🚧 Phase 2: API Architecture (IN PROGRESS)
+- [ ] Standardized API response format
+- [ ] Comprehensive error handling middleware
+- [ ] Request/response logging
+- [ ] API versioning consistency
+- [ ] Rate limiting implementation
+
+### 📋 Phase 3: Database Design (PLANNED)
+- [ ] Complete relational schema implementation
+- [ ] Database indexes for performance
+- [ ] Database migrations system
+- [ ] Data validation at database level
+- [ ] Connection pooling
+
+### 📋 Phase 4: State Management (PLANNED)
+- [ ] Redux/Zustand for complex state
+- [ ] Offline-first architecture
+- [ ] Data caching strategy
+- [ ] Network connectivity handling
+
+### 📋 Phase 5: Real-time Features (PLANNED)
+- [ ] WebSocket integration
+- [ ] Push notifications
+- [ ] Real-time inventory updates
+- [ ] Chat system
+
+### 📋 Phase 6: Performance & Scalability (PLANNED)
+- [ ] Image optimization and CDN
+- [ ] API rate limiting
+- [ ] Database connection pooling
+- [ ] Pagination implementation
 
 ## Prerequisites
 
@@ -28,6 +98,7 @@ Before setting up the project, ensure you have the following installed:
 -   **[Node.js](https://nodejs.org/)** (v22 or later)
 -   **[pnpm](https://pnpm.io/installation)** (v8 or later)
 -   **[Git](https://git-scm.com/)**
+-   **[Docker](https://www.docker.com/get-started)** (for database)
 
 ### For Mobile Development
 
@@ -44,7 +115,6 @@ Before setting up the project, ensure you have the following installed:
 -   **Java Development Kit (JDK)** 17 or higher
 
 ### Optional
--   **[Docker](https://www.docker.com/get-started)** (for running local database)
 -   **[Watchman](https://facebook.github.io/watchman/)** (recommended for better file watching)
 
 ## Installation & Setup
@@ -66,13 +136,15 @@ Install all dependencies for all packages using pnpm:
 pnpm install
 ```
 
-This will install dependencies for:
-- Root workspace
-- `packages/app` (React Native app)
-- `packages/server` (Node.js backend)
-- `packages/shared` (Shared TypeScript types)
+### 3. Start Database
 
-### 3. Environment Setup
+Start PostgreSQL and Redis using Docker:
+
+```bash
+docker-compose up -d
+```
+
+### 4. Environment Setup
 
 #### React Native Environment
 
@@ -91,20 +163,7 @@ brew install --cask android-studio
 sudo gem install cocoapods
 ```
 
-**Android SDK Setup:**
-1. Open Android Studio
-2. Go to SDK Manager
-3. Install Android SDK Platform 34
-4. Install Android SDK Build-Tools
-5. Set up environment variables in `~/.zshrc` or `~/.bash_profile`:
-
-```bash
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-```
-
-### 4. iOS Setup (macOS only)
+### 5. iOS Setup (macOS only)
 
 ```bash
 cd packages/app/ios
@@ -112,7 +171,7 @@ pod install
 cd ../..
 ```
 
-### 5. Android Setup
+### 6. Android Setup
 
 Ensure Android emulator is running or device is connected:
 
@@ -127,172 +186,57 @@ emulator -avd <emulator-name>
 adb devices
 ```
 
-## Setup Verification
-
-After completing the setup, verify everything works:
-
-```bash
-# 1. Test that all dependencies are installed
-pnpm install
-
-# 2. Verify React Native setup
-cd packages/app
-npx react-native doctor
-
-# 3. Test iOS (macOS only)
-npx react-native run-ios
-
-# 4. Test Android
-npx react-native run-android
-```
-
-You should see the Seller Dashboard screen with an "Add Product" button on both platforms.
-
 ## Running the Application
 
-### Backend Server
+### 1. Start Database
+```bash
+docker-compose up -d
+```
 
-Start the Node.js backend server:
-
+### 2. Start Backend Server
 ```bash
 pnpm --filter server dev
 ```
 
-The server will be running on `http://localhost:3000`.
-
-### Mobile App
+### 3. Start Mobile App
 
 #### iOS (macOS only)
-
 ```bash
-# Using pnpm workspace command
 pnpm --filter app ios
-
-# Or directly in the app directory
-cd packages/app
-npx react-native run-ios
 ```
 
 #### Android
-
 ```bash
-# Using pnpm workspace command
 pnpm --filter app android
-
-# Or directly in the app directory
-cd packages/app
-npx react-native run-android
 ```
 
-### Development Server
+## Authentication
 
-The Metro bundler will start automatically when running the mobile app. If you need to start it manually:
+The app uses JWT-based authentication with the following test credentials:
 
-```bash
-cd packages/app
-npx react-native start
-```
+- **Email**: `seller@vyeya.com`
+- **Password**: `password`
+- **Role**: `seller`
 
-## Troubleshooting
+Additional test user:
+- **Email**: `buyer@vyeya.com`
+- **Password**: `password`
+- **Role**: `buyer`
 
-### Common Issues
+## API Endpoints
 
-#### 1. Babel Runtime Error
-```
-Error: Unable to resolve module @babel/runtime/helpers/interopRequireDefault
-```
+### Authentication
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/register` - User registration
+- `GET /api/v1/auth/me` - Get current user (protected)
+- `POST /api/v1/auth/logout` - User logout (protected)
 
-**Solution:**
-```bash
-cd packages/app
-npm install @babel/runtime
-npx react-native start --reset-cache
-```
-
-#### 2. CocoaPods Issues (iOS)
-```
-Unable to open base configuration reference file
-```
-
-**Solution:**
-```bash
-cd packages/app/ios
-# Clean and reinstall pods
-rm -rf Pods Podfile.lock
-export LANG=en_US.UTF-8
-pod install
-```
-
-#### 3. Android Gradle Plugin Path Error
-```
-Included build does not exist
-```
-
-**Solution:** The `android/settings.gradle` file has been configured for pnpm monorepo structure.
-
-#### 4. Navigation Stack View Error
-```
-Cannot read property 'StackView' of undefined
-TurboModuleRegistry.getEnforcing(...): 'RNGestureHandlerModule' could not be found
-```
-
-**Solution:** Install and configure gesture handler:
-```bash
-cd packages/app
-npm install react-native-gesture-handler
-```
-
-Then ensure it's imported at the top of `index.js`:
-```javascript
-import 'react-native-gesture-handler';
-import 'react-native-screens';
-```
-
-For iOS, rebuild after installing:
-```bash
-cd ios && pod install && cd ..
-npx react-native run-ios
-```
-
-#### 5. iOS C++ Compilation Errors
-```
-Clang compilation errors during iOS build
-```
-
-**Solution:**
-```bash
-cd packages/app/ios
-# Clean everything and reinstall
-rm -rf Pods Podfile.lock
-rm -rf ~/Library/Developer/Xcode/DerivedData/Vyeya-*
-export LANG=en_US.UTF-8
-pod install
-cd ..
-npx react-native run-ios
-```
-
-#### 6. Metro Cache Issues
-
-**Solution:**
-```bash
-cd packages/app
-npx react-native start --reset-cache
-# Or
-rm -rf node_modules/.cache
-watchman watch-del-all
-```
-
-### Development Tools
-
-#### React Native Debugger
-
-1. Install [React Native Debugger](https://github.com/jhen0409/react-native-debugger)
-2. Enable debugging in the app (Cmd+D on iOS, Cmd+M on Android)
-3. Select "Debug" to connect
-
-#### Flipper (Optional)
-
-For advanced debugging, install [Flipper](https://fbflipper.com/).
+### Products
+- `GET /api/v1/products` - Get all products
+- `POST /api/v1/products` - Create product (protected)
+- `GET /api/v1/products/:id` - Get product by ID
+- `PUT /api/v1/products/:id` - Update product (protected)
+- `DELETE /api/v1/products/:id` - Delete product (protected)
 
 ## Project Structure
 
@@ -304,93 +248,81 @@ Vyeya/
 │   │   │   ├── components/     # Reusable UI components
 │   │   │   ├── screens/        # Screen components
 │   │   │   ├── navigation/     # Navigation configuration
+│   │   │   ├── context/        # React contexts (Auth)
 │   │   │   └── services/       # API services
 │   │   ├── android/            # Android-specific code
 │   │   ├── ios/                # iOS-specific code
-│   │   ├── App.tsx             # Main app component
-│   │   ├── index.js            # App entry point
 │   │   └── package.json
 │   ├── server/                 # Node.js backend
 │   │   ├── src/
 │   │   │   ├── routes/         # API routes
 │   │   │   ├── models/         # Database models
 │   │   │   ├── middleware/     # Express middleware
-│   │   │   └── services/       # Business logic
+│   │   │   ├── services/       # Business logic services
+│   │   │   └── scripts/        # Database scripts
 │   │   └── package.json
 │   └── shared/                 # Shared TypeScript types
-│       ├── src/
-│       │   └── index.ts        # Exported types and interfaces
 │       └── package.json
+├── docker-compose.yml          # Database containers
 ├── pnpm-workspace.yaml         # pnpm workspace configuration
-├── package.json                # Root package.json
 └── README.md
 ```
 
-## Available Scripts
+## Key Dependencies
 
-### Root Level
+### Mobile App
+- **React Native**: 0.80.2
+- **React Navigation**: ^7.1.17
+- **AsyncStorage**: ^2.2.0 (Token persistence)
+- **Tailwind RN**: ^4.9.1
+- **TypeScript**: Latest
+
+### Backend
+- **Express.js**: Latest
+- **jsonwebtoken**: ^9.0.2 (JWT authentication)
+- **bcryptjs**: ^3.0.2 (Password hashing)
+- **pg**: Latest (PostgreSQL client)
+- **TypeScript**: 5.x
+
+## Development Workflow
+
+1. **Start Database**: `docker-compose up -d`
+2. **Start Backend**: `pnpm --filter server dev`
+3. **Start Mobile App**: `pnpm --filter app android` or `pnpm --filter app ios`
+4. **Login**: Use `seller@vyeya.com` / `password`
+5. **Test Features**: Add products, view dashboard, logout/login
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Database Connection Issues
 ```bash
-# Install all dependencies
-pnpm install
-
-# Run server
-pnpm --filter server dev
-
-# Run mobile app
-pnpm --filter app ios
-pnpm --filter app android
+# Restart database containers
+docker-compose down
+docker-compose up -d
 ```
 
-### App Package
+#### 2. JWT Token Issues
+```bash
+# Clear app storage and restart
+# On Android: Settings > Apps > Vyeya > Storage > Clear Data
+```
+
+#### 3. Metro Cache Issues
 ```bash
 cd packages/app
-
-# Start Metro bundler
-npm start
-
-# Run on iOS
-npm run ios
-
-# Run on Android
-npm run android
-
-# Run tests
-npm test
-
-# Lint code
-npm run lint
+npx react-native start --reset-cache
 ```
 
-### Server Package
+#### 4. iOS Build Issues
 ```bash
-cd packages/server
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+cd packages/app/ios
+rm -rf Pods Podfile.lock
+pod install
+cd ..
+npx react-native run-ios
 ```
-
-## Dependencies
-
-### Mobile App Key Dependencies
-- **React Native**: 0.80.2
-- **React Navigation**: ^7.1.17 (Stack Navigator)
-- **React Native Screens**: ^4.13.1
-- **React Native Gesture Handler**: ^2.28.0 (Required for navigation)
-- **React Native Safe Area Context**: ^5.6.0
-- **Tailwind RN (twrnc)**: ^4.9.1
-- **AWS Cognito Identity JS**: ^6.3.15
-- **Babel Runtime**: ^7.28.2 (Critical for Metro bundler)
-
-### Backend Key Dependencies
-- **Express.js**: Latest
-- **TypeScript**: 5.x
-- **Node.js**: v22+
 
 ## Contributing
 

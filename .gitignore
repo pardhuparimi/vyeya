@@ -40,3 +40,16 @@ coverage/
 # React Native
 packages/app/ios/Pods/
 packages/app/ios/Podfile.lock
+
+# Android build artifacts
+packages/app/android/.gradle/
+packages/app/android/app/.cxx/
+packages/app/android/app/build/
+packages/app/android/build/
+*.apk
+*.aab
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
