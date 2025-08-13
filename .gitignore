@@ -2,10 +2,17 @@
 node_modules/
 packages/*/node_modules/
 
+# Lock files (should not be committed in monorepos)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
 # Build outputs
 packages/app/android/build/
 packages/app/ios/build/
 packages/server/dist/
+build/
+dist/
 
 # Environment files
 .env
@@ -14,6 +21,8 @@ packages/server/dist/
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
@@ -22,13 +31,15 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Runtime data
 pids
 *.pid
 *.seed
 
-# Coverage directory used by tools like istanbul
+# Coverage
 coverage/
 
 # Docker
@@ -37,19 +48,32 @@ coverage/
 # Metro
 .metro-health-check*
 
-# React Native
+# React Native iOS
 packages/app/ios/Pods/
 packages/app/ios/Podfile.lock
+packages/app/ios/build/
+packages/app/ios/*.xcworkspace
 
-# Android build artifacts
+# React Native Android
 packages/app/android/.gradle/
 packages/app/android/app/.cxx/
 packages/app/android/app/build/
 packages/app/android/build/
+packages/app/android/gradle/
+packages/app/android/gradlew*
+packages/app/android/local.properties
 *.apk
 *.aab
 
-# Lock files
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
+# Android keystore (security risk)
+*.keystore
+*.jks
+
+# Generated icons and assets
+packages/app/android/app/src/main/res/mipmap-*/
+packages/app/ios/Vyeya/Images.xcassets/
+
+# Xcode
+packages/app/ios/*.xcodeproj/xcuserdata/
+packages/app/ios/*.xcodeproj/project.xcworkspace/
+packages/app/ios/DerivedData/
