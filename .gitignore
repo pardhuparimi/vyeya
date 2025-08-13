@@ -64,6 +64,13 @@ packages/app/android/gradlew*
 packages/app/android/local.properties
 *.apk
 *.aab
+*.so
+
+# All build directories
+**/build/
+**/.cxx/
+**/intermediates/
+**/outputs/
 
 # Android keystore (security risk)
 *.keystore
