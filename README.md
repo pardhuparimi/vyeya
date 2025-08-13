@@ -188,27 +188,24 @@ adb devices
 
 ## Running the Application
 
-### 1. Start Database
+### Essential Steps
+
+1. **Start Database**
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-### 2. Start Backend Server
+2. **Start Backend Server**
 ```bash
-pnpm --filter server dev
+cd packages/server && npm run dev
 ```
 
-### 3. Start Mobile App
-
-#### iOS (macOS only)
+3. **Run Mobile App**
 ```bash
-pnpm --filter app ios
+cd packages/app && npm run android
 ```
 
-#### Android
-```bash
-pnpm --filter app android
-```
+> **Note**: If you get connection errors, run: `adb reverse tcp:3000 tcp:3000`
 
 ## Authentication
 
@@ -225,9 +222,12 @@ Additional test user:
 
 ## API Endpoints
 
+### Health Check
+- `GET /health` - Server and database status
+
 ### Authentication
 - `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/register` - User registration  
 - `GET /api/v1/auth/me` - Get current user (protected)
 - `POST /api/v1/auth/logout` - User logout (protected)
 
@@ -237,6 +237,8 @@ Additional test user:
 - `GET /api/v1/products/:id` - Get product by ID
 - `PUT /api/v1/products/:id` - Update product (protected)
 - `DELETE /api/v1/products/:id` - Delete product (protected)
+
+
 
 ## Project Structure
 
@@ -286,42 +288,85 @@ Vyeya/
 
 ## Development Workflow
 
-1. **Start Database**: `docker-compose up -d`
-2. **Start Backend**: `pnpm --filter server dev`
-3. **Start Mobile App**: `pnpm --filter app android` or `pnpm --filter app ios`
-4. **Login**: Use `seller@vyeya.com` / `password`
-5. **Test Features**: Add products, view dashboard, logout/login
+### Test Authentication
+- **Existing User**: `seller@vyeya.com` / `password`
+- **New Users**: Use signup form with unique email addresses
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### 1. Database Connection Issues
+#### 1. "Cannot connect to Metro" Error
+```bash
+# Kill existing Metro process and restart
+kill -9 $(lsof -ti:8081) 2>/dev/null || true
+cd packages/app
+npx react-native start --reset-cache
+
+# In another terminal, setup port forwarding
+adb reverse tcp:8081 tcp:8081
+```
+
+#### 2. "Signup/Login Failed" - Network Issues
+```bash
+# Ensure port forwarding is set up
+adb reverse tcp:3000 tcp:3000
+
+# Test server connectivity
+curl -X GET http://localhost:3000/health
+
+# Check if emulator is connected
+adb devices
+```
+
+#### 3. Database Connection Issues
 ```bash
 # Restart database containers
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
+
+# Wait for containers to be healthy
+docker ps
 ```
 
-#### 2. JWT Token Issues
+#### 4. "User already exists" Error
 ```bash
-# Clear app storage and restart
-# On Android: Settings > Apps > Vyeya > Storage > Clear Data
+# Use different email addresses for testing
+# Or check existing users in database:
+docker exec -i vyeya-postgres psql -U postgres -d vyeya -c "SELECT email FROM users;"
 ```
 
-#### 3. Metro Cache Issues
+#### 5. Android Emulator Not Starting
+```bash
+# Check available emulators
+~/Library/Android/sdk/emulator/emulator -list-avds
+
+# Kill existing emulator processes
+killall qemu-system-aarch64 2>/dev/null || true
+
+# Start fresh emulator
+~/Library/Android/sdk/emulator/emulator -avd YOUR_AVD_NAME
+```
+
+#### 6. Metro Cache Issues
 ```bash
 cd packages/app
 npx react-native start --reset-cache
 ```
 
-#### 4. iOS Build Issues
+#### 7. iOS Build Issues (macOS only)
 ```bash
 cd packages/app/ios
 rm -rf Pods Podfile.lock
 pod install
 cd ..
 npx react-native run-ios
+```
+
+#### 8. JWT Token Issues
+```bash
+# Clear app storage and restart
+# On Android: Settings > Apps > Vyeya > Storage > Clear Data
 ```
 
 ## Contributing
