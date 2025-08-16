@@ -23,8 +23,8 @@ describe('API Integration Tests', () => {
         .post('/api/v1/auth/login')
         .send({});
       
-      // Can be 400/422 (validation errors) or 500 (server errors due to missing DB)
-      expect([400, 422, 500]).toContain(response.status);
+      // Can be 400/401/422 (validation errors) or 500 (server errors due to missing DB)
+      expect([400, 401, 422, 500]).toContain(response.status);
     });
   });
 

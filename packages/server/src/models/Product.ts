@@ -13,17 +13,23 @@ export interface Product {
 
 export class ProductModel {
   static async findAll(): Promise<Product[]> {
-    const result = await pool.query('SELECT id, name, price, stock, category_id as category, user_id as "userId", created_at FROM products ORDER BY created_at DESC');
+    const result = await pool.query('SELECT id, name, price, stock, category_id as category, store_id, created_at FROM products ORDER BY created_at DESC');
     return result.rows;
   }
 
   static async findById(id: string): Promise<Product | null> {
-    const result = await pool.query('SELECT id, name, price, stock, category_id as category, user_id as "userId", created_at FROM products WHERE id = $1', [id]);
+    const result = await pool.query('SELECT id, name, price, stock, category_id as category, store_id, created_at FROM products WHERE id = $1', [id]);
     return result.rows[0] || null;
   }
 
   static async findByUserId(userId: string): Promise<Product[]> {
-    const result = await pool.query('SELECT * FROM products WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+    // Find products through stores owned by the user
+    const result = await pool.query(`
+      SELECT p.* FROM products p 
+      JOIN stores s ON p.store_id = s.id 
+      WHERE s.user_id = $1 
+      ORDER BY p.created_at DESC
+    `, [userId]);
     return result.rows;
   }
 
