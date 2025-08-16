@@ -8,7 +8,8 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/src/test.ts' // Ignore the standalone test file
+    '/src/test.ts', // Ignore the standalone test file
+    '/src/index.ts' // Ignore the main server file
   ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
@@ -18,6 +19,7 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/__tests__/**',
     '!src/test.ts',
+    '!src/index.ts',
   ],
   testTimeout: 30000, // 30 seconds for integration tests
 };
