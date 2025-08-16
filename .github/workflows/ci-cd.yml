@@ -338,20 +338,26 @@ jobs:
           pod install
           
       - name: Setup iOS certificates (if provided)
-        if: ${{ secrets.IOS_CERTIFICATE_P12 != '' }}
         run: |
-          echo "${{ secrets.IOS_CERTIFICATE_P12 }}" | base64 -d > ios-cert.p12
-          security create-keychain -p "" build.keychain
-          security import ios-cert.p12 -k build.keychain -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A
-          security list-keychains -s build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
+          if [ -n "${{ secrets.IOS_CERTIFICATE_P12 }}" ]; then
+            echo "${{ secrets.IOS_CERTIFICATE_P12 }}" | base64 -d > ios-cert.p12
+            security create-keychain -p "" build.keychain
+            security import ios-cert.p12 -k build.keychain -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A
+            security list-keychains -s build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "" build.keychain
+          else
+            echo "No iOS certificate provided, skipping certificate setup"
+          fi
           
       - name: Setup provisioning profile (if provided)
-        if: ${{ secrets.IOS_PROVISIONING_PROFILE != '' }}
         run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          if [ -n "${{ secrets.IOS_PROVISIONING_PROFILE }}" ]; then
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          else
+            echo "No iOS provisioning profile provided, skipping profile setup"
+          fi
           
       - name: Build iOS app
         run: |
@@ -373,13 +379,16 @@ jobs:
           fi
           
       - name: Export IPA (if signed)
-        if: ${{ secrets.IOS_CERTIFICATE_P12 != '' }}
         run: |
           cd packages/app
-          xcodebuild -exportArchive \
-            -archivePath ios/build/Vyeya.xcarchive \
-            -exportPath ios/build \
-            -exportOptionsPlist ios/ExportOptions.plist
+          if [ -n "${{ secrets.IOS_CERTIFICATE_P12 }}" ]; then
+            xcodebuild -exportArchive \
+              -archivePath ios/build/Vyeya.xcarchive \
+              -exportPath ios/build \
+              -exportOptionsPlist ios/ExportOptions.plist
+          else
+            echo "No iOS certificate provided, skipping IPA export"
+          fi
             
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v4
