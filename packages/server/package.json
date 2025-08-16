@@ -10,6 +10,7 @@
     "test": "jest --passWithNoTests",
     "test:unit": "jest --testPathIgnorePatterns=integration --testPathIgnorePatterns=e2e --testPathIgnorePatterns=http --passWithNoTests",
     "test:integration": "jest --testPathPattern=integration --passWithNoTests",
+    "test:e2e": "jest --testPathPattern=e2e --passWithNoTests",
     "test:http": "jest --testPathPattern=http --passWithNoTests",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=integration --testPathIgnorePatterns=e2e --testPathIgnorePatterns=http --passWithNoTests",
     "test:watch": "jest --watch",

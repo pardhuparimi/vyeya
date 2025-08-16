@@ -5,8 +5,12 @@
 CREATE TABLE users (
     id VARCHAR(255) PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
-    role VARCHAR(20) CHECK (role IN ('Buyer', 'Seller', 'Delivery', 'Admin')) NOT NULL,
+    role VARCHAR(20) CHECK (role IN ('buyer', 'grower', 'Buyer', 'Seller', 'Delivery', 'Admin')) NOT NULL,
+    bio TEXT,
+    location VARCHAR(255),
     address JSONB,
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -76,8 +80,8 @@ INSERT INTO categories (id, name) VALUES
 ('2', 'Dairy'),
 ('3', 'Bakery');
 
-INSERT INTO users (id, email, phone, role, address) VALUES 
-('1', 'farmer@example.com', '+1234567890', 'Seller', '{"street": "123 Farm St", "city": "Brooklyn", "state": "NY"}');
+INSERT INTO users (id, email, password, name, phone, role, bio, location, address) VALUES 
+('1', 'farmer@example.com', '$2b$10$example.hash.for.testing', 'John Farmer', '+1234567890', 'grower', 'Local organic farmer', 'Brooklyn, NY', '{"street": "123 Farm St", "city": "Brooklyn", "state": "NY"}');
 
 INSERT INTO stores (id, user_id, name, type, location, hours, verified) VALUES 
 ('1', '1', 'Local Farm Market', 'Casual', '{"lat": 40.7128, "lng": -74.0060}', '{"open": "8:00", "close": "18:00"}', true);

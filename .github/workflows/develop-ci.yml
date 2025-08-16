@@ -90,7 +90,7 @@ jobs:
       
       - name: 🔗 Run Integration Tests
         run: |
-          echo "🔗 Running HTTP integration tests in Docker environment..."
+          echo "🔗 Running E2E integration tests in Docker environment..."
           docker compose -f docker-compose.ci.yml run --rm ci-test bash -c "
             cd /workspace &&
             pnpm install --frozen-lockfile &&
@@ -102,7 +102,7 @@ jobs:
             export DB_NAME='vyeya_test' &&
             export DB_PORT='5432' &&
             node src/scripts/init-db.js &&
-            echo '🧪 Starting server HTTP integration tests...' &&
+            echo '🧪 Starting E2E integration tests...' &&
             export POSTGRES_HOST='postgres-test' &&
             export POSTGRES_USER='test' &&
             export POSTGRES_PASSWORD='test' &&
@@ -111,6 +111,9 @@ jobs:
             export REDIS_URL='redis://redis-test:6379' &&
             export NODE_ENV=test &&
             export CI=true &&
+            echo '🔗 Running real integration tests with database...' &&
+            pnpm test:e2e --verbose &&
+            echo '📊 Running basic HTTP route tests...' &&
             pnpm test:http --verbose
           "
       

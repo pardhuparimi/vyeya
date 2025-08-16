@@ -17,6 +17,7 @@ export interface User {
 }
 
 export const generateToken = (userId: string): string => {
+  // @ts-ignore - JWT library type compatibility issue
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
