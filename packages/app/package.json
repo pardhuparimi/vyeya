@@ -25,7 +25,8 @@
     "bundle:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
     "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle",
     "clean": "react-native clean-project-auto",
-    "postinstall": "cd ios && pod install"
+    "postinstall": "if [ \"$CI\" != \"true\" ] && [ -d \"ios\" ] && command -v pod >/dev/null 2>&1; then cd ios && pod install; fi",
+    "ios:pods": "cd ios && pod install"
   },
   "dependencies": {
     "@babel/runtime": "7.28.2",
