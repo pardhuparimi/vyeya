@@ -141,8 +141,14 @@ jobs:
             export DB_PORT='5432' &&
             node src/scripts/init-db.js &&
             echo '🧪 Starting server HTTP integration tests...' &&
+            export POSTGRES_HOST='postgres-test' &&
+            export POSTGRES_USER='test' &&
+            export POSTGRES_PASSWORD='test' &&
+            export POSTGRES_DB='vyeya_test' &&
+            export POSTGRES_PORT='5432' &&
             export REDIS_URL='redis://redis-test:6379' &&
             export NODE_ENV=test &&
+            export CI=true &&
             pnpm test:http --verbose
           "
       
