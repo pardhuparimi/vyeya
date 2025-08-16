@@ -4,28 +4,6 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Fallback mock data
-const mockProducts = [
-  {
-    id: '1',
-    store_id: '1',
-    name: 'Fresh Mangoes',
-    price: 5.99,
-    stock: 50,
-    location: { lat: 40.7128, lng: -74.0060 },
-    category_id: '1'
-  },
-  {
-    id: '2',
-    store_id: '1',
-    name: 'Organic Tomatoes',
-    price: 3.49,
-    stock: 25,
-    location: { lat: 40.7128, lng: -74.0060 },
-    category_id: '1'
-  }
-];
-
 // GET /api/v1/products
 router.get('/', async (req, res) => {
   try {
@@ -35,11 +13,13 @@ router.get('/', async (req, res) => {
       total: products.length
     });
   } catch (error) {
-    console.error('Database error:', error);
-    // Fallback to mock data if database fails
-    res.json({
-      products: mockProducts,
-      total: mockProducts.length
+    // Log database connection errors in development only
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Database error:', error);
+    }
+    res.status(500).json({ 
+      error: 'Database connection failed',
+      message: 'Unable to fetch products from database'
     });
   }
 });

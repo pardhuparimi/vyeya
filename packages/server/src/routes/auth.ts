@@ -37,7 +37,10 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (_error) {
-    console.error('Login error:', _error);
+    // Log auth errors in development only
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Login error:', _error);
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -75,7 +78,10 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (_error) {
-    console.error('Registration error:', _error);
+    // Log registration errors in development only
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Registration error:', _error);
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
