@@ -87,6 +87,7 @@ jobs:
           
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
         continue-on-error: true
@@ -204,6 +205,20 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/vyeya_test
           
+      - name: Start server for integration tests
+        run: |
+          cd packages/server
+          npm start &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          sleep 10
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/vyeya_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret-key-for-ci-testing
+          NODE_ENV: test
+          PORT: 3000
+          
       - name: Run integration tests
         run: pnpm test:integration
         env:
@@ -211,6 +226,13 @@ jobs:
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-secret-key-for-ci-testing
           NODE_ENV: test
+          
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi
           
       - name: Build Docker image
         run: docker build -t vyeya-api:${{ github.sha }} -f packages/server/Dockerfile .
