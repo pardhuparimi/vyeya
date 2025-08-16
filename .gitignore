@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 packages/*/node_modules/
+.pnpm-store/
 
 # Lock files (package-lock.json and yarn.lock should not be committed when using pnpm)
 package-lock.json

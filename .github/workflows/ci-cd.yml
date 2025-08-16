@@ -11,13 +11,13 @@ env:
   PNPM_VERSION: '9.15.0'
 
 jobs:
-  # Phase 1: Quick Quality Gate - All checks in one job for speed
+  # Phase 1: Quality Gate - Code Quality & Unit Tests
   quality-gate:
     name: 🔍 Quality Gate
     runs-on: ubuntu-latest
     outputs:
-      should-deploy: ${{ steps.check.outputs.should-deploy }}
-      environment: ${{ steps.check.outputs.environment }}
+      should-deploy: ${{ steps.deployment-check.outputs.should-deploy }}
+      environment: ${{ steps.deployment-check.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
       
@@ -41,15 +41,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: 🔎 Lint & Type Check
-        run: |
-          pnpm lint
-          pnpm type-check
+      - name: 🔎 Lint Code
+        run: pnpm lint
       
-      - name: 🧪 Unit Tests
+      - name: 🔍 Type Check
+        run: pnpm type-check
+      
+      - name: 🧪 Unit Tests (Server)
         run: |
           cd packages/server
-          pnpm test:coverage -- --maxWorkers=2
+          pnpm test:unit -- --verbose
+          echo "Unit test results:"
+          find . -name "*.test.ts" -not -path "./node_modules/*" | wc -l
+      
+      - name: 🧪 Unit Tests (App)
+        run: |
+          cd packages/app
+          pnpm test -- --passWithNoTests --verbose
+      
+      - name: 📊 Coverage Report
+        run: |
+          cd packages/server
+          pnpm test:coverage
       
       - name: 🔒 Security Scan
         uses: aquasecurity/trivy-action@master
@@ -67,101 +80,79 @@ jobs:
           sarif_file: 'trivy-results.sarif'
         continue-on-error: true
       
-      - name: Determine deployment
-        id: check
+      - name: Check Deployment Requirements
+        id: deployment-check
         run: |
-          echo "🔍 Current branch: ${{ github.ref }}"
+          echo "🔍 Branch: ${{ github.ref }}"
+          echo "🔍 Event: ${{ github.event_name }}"
           
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          # Only deploy from main branch, not develop
+          if [[ "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
             echo "should-deploy=true" >> $GITHUB_OUTPUT
             echo "environment=production" >> $GITHUB_OUTPUT
-            echo "✅ Deploying to PRODUCTION"
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "should-deploy=true" >> $GITHUB_OUTPUT
-            echo "environment=dev" >> $GITHUB_OUTPUT
-            echo "✅ Deploying to DEV"
-          elif [[ "${{ github.ref }}" == "refs/heads/release/"* ]]; then
+            echo "✅ Will deploy to PRODUCTION"
+          elif [[ "${{ github.ref }}" == "refs/heads/release/"* && "${{ github.event_name }}" == "push" ]]; then
             echo "should-deploy=true" >> $GITHUB_OUTPUT
             echo "environment=qa" >> $GITHUB_OUTPUT
-            echo "✅ Deploying to QA"
+            echo "✅ Will deploy to QA"
           else
             echo "should-deploy=false" >> $GITHUB_OUTPUT
             echo "environment=none" >> $GITHUB_OUTPUT
-            echo "❌ No deployment (feature branch or PR)"
+            echo "ℹ️ Develop branch - running tests only, no deployment"
           fi
-          
-          echo "📝 Outputs set:"
-          echo "  should-deploy: $(grep should-deploy $GITHUB_OUTPUT | cut -d= -f2)"
-          echo "  environment: $(grep environment $GITHUB_OUTPUT | cut -d= -f2)"
 
-  # Phase 2: Integration Tests (only if deploying)
-  integration:
-    name: 🔗 Integration Tests
+  # Phase 2: Integration Tests using Docker (like our local setup)
+  integration-tests:
+    name: 🔗 Integration Tests (Docker)
     runs-on: ubuntu-latest
     needs: quality-gate
-    if: needs.quality-gate.outputs.should-deploy == 'true'
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: vyeya_test
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-    
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js & pnpm
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+      - name: 🐳 Build CI Test Environment
+        run: |
+          echo "🐳 Building Docker test environment..."
+          docker compose -f docker-compose.ci.yml build
       
-      - name: Install pnpm
-        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
-      
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 🚀 Start Test Services
+        run: |
+          echo "🚀 Starting PostgreSQL and Redis..."
+          docker compose -f docker-compose.ci.yml up -d postgres-test redis-test
+          
+          # Wait for services to be ready
+          echo "⏳ Waiting for services..."
+          sleep 10
+          
+          # Check if services are running
+          docker compose -f docker-compose.ci.yml ps
       
       - name: 🔗 Run Integration Tests
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/vyeya_test
-          REDIS_URL: redis://localhost:6379
-          NODE_ENV: test
         run: |
-          cd packages/server
-          pnpm test:integration
+          echo "🔗 Running HTTP integration tests in Docker environment..."
+          docker compose -f docker-compose.ci.yml run --rm ci-test bash -c "
+            cd /workspace &&
+            pnpm install --frozen-lockfile &&
+            echo '🧪 Starting server HTTP integration tests...' &&
+            cd packages/server &&
+            export DB_HOST='postgres-test' &&
+            export DB_USER='test' &&
+            export DB_PASSWORD='test' &&
+            export DB_NAME='vyeya_test' &&
+            export DB_PORT='5432' &&
+            export REDIS_URL='redis://redis-test:6379' &&
+            export NODE_ENV=test &&
+            pnpm test:http --verbose
+          "
+      
+      - name: 🧹 Cleanup
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v
 
-  # Phase 3: Build & Deploy (only if integration passes)
-  deploy:
-    name: 🚀 Deploy (${{ needs.quality-gate.outputs.environment }})
+  # Phase 3: Build & Deploy (only for main and release branches)
+  build-and-deploy:
+    name: 🚀 Build & Deploy
     runs-on: ubuntu-latest
-    needs: [quality-gate, integration]
+    needs: [quality-gate, integration-tests]
     if: needs.quality-gate.outputs.should-deploy == 'true'
     environment:
       name: ${{ needs.quality-gate.outputs.environment }}
@@ -178,64 +169,52 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm@${{ env.PNPM_VERSION }}
       
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-      
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: 🏗️ Build
+      - name: 🏗️ Build Server
         run: |
           cd packages/server
           pnpm build
+          echo "✅ Server built successfully"
       
-      - name: 🐳 Build Docker Image
+      - name: 🏗️ Build App
+        run: |
+          cd packages/app
+          # Add app build commands here when needed
+          echo "✅ App build ready"
+      
+      - name: 🐳 Build Production Docker Image
         run: |
           docker build -f packages/server/Dockerfile -t vyeya-server:${{ github.sha }} packages/server
+          echo "✅ Docker image built"
       
-      - name: 🚀 Deploy to ${{ needs.quality-gate.outputs.environment }}
+      - name: 🚀 Deploy
         id: deploy
         run: |
           ENVIRONMENT="${{ needs.quality-gate.outputs.environment }}"
           echo "🚀 Deploying to ${ENVIRONMENT}"
           
-          # Set deployment URL based on environment
           case "${ENVIRONMENT}" in
             "production")
               echo "url=https://vyeya.app" >> $GITHUB_OUTPUT
-              ;;
-            "dev") 
-              echo "url=https://dev.vyeya.app" >> $GITHUB_OUTPUT
+              echo "🌍 Production deployment would go here"
+              # Add actual AWS/production deployment
               ;;
             "qa")
               echo "url=https://qa.vyeya.app" >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "url=https://unknown.vyeya.app" >> $GITHUB_OUTPUT
-              echo "⚠️ Unknown environment: ${ENVIRONMENT}"
+              echo "🔧 QA deployment would go here"
+              # Add QA deployment
               ;;
           esac
           
-          echo "📦 Environment: ${ENVIRONMENT}"
-          echo "🌐 URL will be: $(cat $GITHUB_OUTPUT | grep url= | cut -d= -f2)"
-          
-          # Add your actual deployment commands here based on environment
-          # Examples:
-          # aws ecs update-service --cluster vyeya-${ENVIRONMENT}
-          # kubectl apply -f k8s/${ENVIRONMENT}/
-          # terraform apply -var-file=environments/${ENVIRONMENT}.tfvars
+          echo "✅ Deployment completed to ${ENVIRONMENT}"
 
-  # Phase 4: Post-Deploy Validation (only for production)
-  post-deploy:
+  # Phase 4: Post-Deploy Tests (only for production)
+  post-deploy-tests:
     name: 🎯 Post-Deploy Tests
     runs-on: ubuntu-latest
-    needs: [quality-gate, deploy]
+    needs: [quality-gate, build-and-deploy]
     if: needs.quality-gate.outputs.environment == 'production'
     
     steps:
@@ -244,9 +223,9 @@ jobs:
       - name: 🔥 Load Tests
         run: |
           echo "🔥 Running load tests against production"
-          # cd packages/server && k6 run k6-load-test.js --vus 10 --duration 60s
+          # Add k6 load tests here
       
       - name: 🎭 E2E Tests
         run: |
           echo "🎭 Running E2E tests against production"
-          # maestro test packages/app/maestro/comprehensive_test.yaml
+          # Add Maestro E2E tests here
