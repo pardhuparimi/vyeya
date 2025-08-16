@@ -1,6 +1,5 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+// Note: bcrypt and jwt imports removed - functionality provided by authService
 import pool from '../config/database';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { 
@@ -37,8 +36,8 @@ router.post('/login', async (req, res) => {
         location: user.location
       }
     });
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (_error) {
+    console.error('Login error:', _error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -75,8 +74,8 @@ router.post('/register', async (req, res) => {
         location: user.location
       }
     });
-  } catch (error) {
-    console.error('Registration error:', error);
+  } catch (_error) {
+    console.error('Registration error:', _error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -101,7 +100,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
         location: user.location
       }
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -136,7 +135,7 @@ router.put('/profile', authenticateToken, async (req: AuthRequest, res) => {
         location: user.location
       }
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -156,7 +155,7 @@ router.get('/grower/:id', async (req, res) => {
     }
     
     res.json({ grower });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Server error' });
   }
 });

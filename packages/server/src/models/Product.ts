@@ -45,7 +45,7 @@ export class ProductModel {
 
   static async update(id: string, product: Partial<Product>): Promise<Product | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | object)[] = [];
     let paramCount = 1;
 
     Object.entries(product).forEach(([key, value]) => {

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../index';
 
-export const makeRequest = (method: string, endpoint: string, data?: any) => {
+export const makeRequest = (method: string, endpoint: string, data?: object) => {
   const requestAgent = request(app);
   
   switch (method.toUpperCase()) {
