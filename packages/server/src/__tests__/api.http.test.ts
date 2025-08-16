@@ -51,12 +51,12 @@ describe('API Integration Tests', () => {
   });
 
   describe('User Routes', () => {
-    it('should have users routes accessible', async () => {
+    it('should have user profile route', async () => {
       const response = await request(app)
-        .get('/api/v1/users');
+        .get('/api/v1/users/profile');
       
       expect(response.status).not.toBe(404);
-      expect([200, 500]).toContain(response.status);
+      expect([200, 401, 500]).toContain(response.status);
     });
   });
 
@@ -71,12 +71,12 @@ describe('API Integration Tests', () => {
   });
 
   describe('Order Routes', () => {
-    it('should have order routes accessible', async () => {
+    it('should have order routes accessible (requires auth)', async () => {
       const response = await request(app)
         .get('/api/v1/orders');
       
       expect(response.status).not.toBe(404);
-      expect([200, 500]).toContain(response.status);
+      expect([200, 401, 500]).toContain(response.status);
     });
   });
 });

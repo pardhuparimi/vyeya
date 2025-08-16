@@ -132,13 +132,15 @@ jobs:
           docker compose -f docker-compose.ci.yml run --rm ci-test bash -c "
             cd /workspace &&
             pnpm install --frozen-lockfile &&
-            echo '🧪 Starting server HTTP integration tests...' &&
+            echo '🗃️ Initializing test database...' &&
             cd packages/server &&
             export DB_HOST='postgres-test' &&
             export DB_USER='test' &&
             export DB_PASSWORD='test' &&
             export DB_NAME='vyeya_test' &&
             export DB_PORT='5432' &&
+            node src/scripts/init-db.js &&
+            echo '🧪 Starting server HTTP integration tests...' &&
             export REDIS_URL='redis://redis-test:6379' &&
             export NODE_ENV=test &&
             pnpm test:http --verbose
