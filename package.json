@@ -15,6 +15,7 @@
 		"dev": "pnpm -r dev",
 		"build": "pnpm -r build",
 		"build:server": "pnpm --filter server build",
+		"build:shared": "pnpm --filter shared build",
 		"build:app": "pnpm --filter app build",
 		"test": "pnpm -r test",
 		"test:unit": "pnpm -r test:unit",
