@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert } from 'react-native';
+import { View, Text, Button, Alert, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
 import ProductList from '../components/ProductList';
 import { IProduct } from '../../../shared/src';
 import { getProducts } from '../services/product.service';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
-const SellerDashboardScreen = ({ navigation }: any) => {
+const ProduceDashboardScreen = ({ navigation }: any) => {
   const { user, logout } = useAuth();
+  const { getItemCount } = useCart();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -17,7 +19,7 @@ const SellerDashboardScreen = ({ navigation }: any) => {
       const fetchedProducts = await getProducts();
       setProducts(fetchedProducts);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch products');
+      Alert.alert('Error', 'Failed to fetch produce');
     } finally {
       setIsLoading(false);
     }
@@ -34,12 +36,12 @@ const SellerDashboardScreen = ({ navigation }: any) => {
   return (
     <View style={tw`flex-1 pt-12`}>
       <View style={tw`flex-row justify-between items-center px-4 mb-4`}>
-        <Text style={tw`text-2xl font-bold`}>Welcome, {user?.name}</Text>
-        <Button title="Logout" onPress={logout} color="red" />
+        <Text style={tw`text-2xl font-bold text-green-700`}>Fresh Local Produce</Text>
+        <Button title="List Produce" onPress={() => navigation.navigate('AddProduct')} />
       </View>
-      <Button title="Add Product" onPress={() => navigation.navigate('AddProduct')} />
+      <Text style={tw`px-4 text-gray-600 mb-4`}>Direct from growers to your table</Text>
       {isLoading ? (
-        <Text style={tw`text-center`}>Loading products...</Text>
+        <Text style={tw`text-center`}>Loading fresh produce...</Text>
       ) : (
         <ProductList products={products} />
       )}
@@ -47,4 +49,4 @@ const SellerDashboardScreen = ({ navigation }: any) => {
   );
 };
 
-export default SellerDashboardScreen;
+export default ProduceDashboardScreen;

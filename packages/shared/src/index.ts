@@ -1,9 +1,11 @@
 export interface IUser {
   id: string;
   email: string;
-  phone: string;
-  role: 'Buyer' | 'Seller' | 'Delivery' | 'Admin';
-  address: any; // Consider a more specific address interface
+  name: string;
+  phone?: string;
+  role: 'buyer' | 'grower' | 'admin';
+  bio?: string;
+  location?: string;
   created_at: Date;
 }
 
@@ -19,12 +21,13 @@ export interface IStore {
 
 export interface IProduct {
   id: string;
-  store_id: string;
+  userId: string;
   name: string;
+  description?: string;
   price: number;
   stock: number;
-  location: any; // Consider a more specific location interface
-  category_id: string;
+  category: string;
+  location?: any;
 }
 
 export interface IOrder {

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ProductModel } from '../models/Product';
+import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -43,6 +44,22 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/v1/products/search
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+    
+    const products = await ProductModel.search(q as string);
+    res.json({ products });
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 // GET /api/v1/products/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -52,15 +69,26 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
     
-    res.json(product);
+    res.json({ product });
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// GET /api/v1/products/my
+router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const products = await ProductModel.findByUserId(req.user?.id || '');
+    res.json(products);
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Failed to fetch your products' });
+  }
+});
+
 // POST /api/v1/products
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const { name, price, stock, store_id, location, category_id } = req.body;
     

@@ -1,0 +1,65 @@
+appId: com.vyeya
+---
+# Test 1: App Launch and Loading Flow with clean state
+# Clear app state to ensure we start from login screen
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Either see loading screen first, or directly see auth screen
+# Wait for auth screen to appear after loading
+- extendedWaitUntil:
+    visible: 
+      id: "auth-title"
+    timeout: 20000
+
+# Test 2: Basic UI Elements
+- assertVisible: 
+    id: "email-input"
+- assertVisible:
+    id: "password-input"
+- assertVisible: "LOGIN"
+- assertVisible: "Need an account? Sign Up"
+
+# Test 3: Form Interaction
+- tapOn:
+    id: "email-input"
+- eraseText
+- inputText: "test@example.com"
+
+- tapOn:
+    id: "password-input"  
+- eraseText
+- inputText: "testpassword"
+
+# Test 4: Login Attempt with invalid credentials
+- tapOn: "LOGIN"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Handle the login failed alert that appears
+- assertVisible: "Login failed"
+- tapOn: "OK"  # Dismiss the alert
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Test 5: Navigation Test - Switch to signup mode (should work now that alert is dismissed)
+- tapOn: "Need an account? Sign Up"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify we switched to signup mode
+- assertVisible: "Already have an account? Login"
+
+# Test 6: Switch back to login mode
+- tapOn: "Already have an account? Login"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify we're back to login mode
+- assertVisible: "Need an account? Sign Up"
+
+# Verify the auth title is still visible throughout navigation
+- assertVisible: 
+    id: "auth-title"

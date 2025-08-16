@@ -1,12 +1,12 @@
-# Vyeya - Hyper-Local Ecommerce Marketplace
+# Vyeya - Direct Producer-to-Consumer Marketplace
 
-Vyeya is a native mobile app (iOS and Android) for a hyper-local ecommerce marketplace connecting local buyers and sellers. This platform prioritizes local commerce, reduces delivery times, supports small businesses, and fosters community-driven shopping experiences.
+Vyeya is a native mobile app (iOS and Android) connecting local produce growers directly with consumers, eliminating middlemen and ensuring fair prices. Whether you're a farmer, backyard gardener, or small-scale grower, this platform empowers you to sell your fresh produce directly to your community while providing consumers with fresh, affordable local products.
 
 ## Project Overview
 
 This repository contains the source code for the Vyeya mobile application and its backend services. It is structured as a monorepo using [pnpm workspaces](https://pnpm.io/workspaces).
 
--   **`packages/app`**: The React Native mobile application for iOS and Android.
+-   **`packages/app`**: The React Native mobile application for growers and consumers.
 -   **`packages/server`**: The Node.js backend server powered by Express.js.
 -   **`packages/shared`**: Shared code, primarily TypeScript types and interfaces, used across the app and server.
 
@@ -29,10 +29,13 @@ This repository contains the source code for the Vyeya mobile application and it
 
 ### Mobile Application
 - ✅ React Native app with TypeScript
-- ✅ Conditional navigation (login screen → dashboard)
+- ✅ Bottom tab navigation (Home, Browse, Search, Cart, Profile)
 - ✅ Authentication context with persistent sessions
-- ✅ Seller dashboard with product management
-- ✅ Add product functionality with form validation
+- ✅ User profile management (view, edit profile)
+- ✅ Product management (add, view, search products)
+- ✅ Shopping cart with quantity controls
+- ✅ Product browsing with category filtering
+- ✅ Toast notification system
 
 ### Backend API
 - ✅ Express.js server with TypeScript
@@ -41,12 +44,15 @@ This repository contains the source code for the Vyeya mobile application and it
 - ✅ Input validation and error handling
 - ✅ PostgreSQL database integration
 - ✅ Product CRUD operations
+- ✅ Product search functionality
+- ✅ User-specific product endpoints
 
 ### Database
 - ✅ PostgreSQL database with Docker setup
 - ✅ Database models and schema
 - ✅ Sample data initialization
 - ✅ Product management with database persistence
+- ✅ Product search with ILIKE queries
 
 ## Architecture Progress
 
@@ -57,37 +63,47 @@ This repository contains the source code for the Vyeya mobile application and it
 - Protected API routes
 - Input validation and sanitization
 
-### 🚧 Phase 2: API Architecture (IN PROGRESS)
+### ✅ Phase 2: Core User Features (COMPLETED)
+- User profile management
+- Product browsing and search
+- Shopping cart functionality
+- Bottom tab navigation
+- Toast notification system
+- Category-based filtering
+
+### 🚧 Phase 3: API Architecture (IN PROGRESS)
 - [ ] Standardized API response format
 - [ ] Comprehensive error handling middleware
 - [ ] Request/response logging
 - [ ] API versioning consistency
 - [ ] Rate limiting implementation
 
-### 📋 Phase 3: Database Design (PLANNED)
-- [ ] Complete relational schema implementation
-- [ ] Database indexes for performance
-- [ ] Database migrations system
-- [ ] Data validation at database level
-- [ ] Connection pooling
-
-### 📋 Phase 4: State Management (PLANNED)
-- [ ] Redux/Zustand for complex state
-- [ ] Offline-first architecture
-- [ ] Data caching strategy
-- [ ] Network connectivity handling
+### 📋 Phase 4: Order Management (PLANNED)
+- [ ] Order creation and tracking
+- [ ] Order history for users
+- [ ] Order status updates
+- [ ] Payment integration
+- [ ] Delivery tracking
 
 ### 📋 Phase 5: Real-time Features (PLANNED)
 - [ ] WebSocket integration
 - [ ] Push notifications
 - [ ] Real-time inventory updates
-- [ ] Chat system
+- [ ] Chat system between buyers/sellers
 
-### 📋 Phase 6: Performance & Scalability (PLANNED)
+### 📋 Phase 6: Advanced Features (PLANNED)
+- [ ] Location-based product discovery
+- [ ] Image upload for products
+- [ ] Reviews and ratings
+- [ ] Seller verification
+- [ ] Advanced search filters
+
+### 📋 Phase 7: Performance & Scalability (PLANNED)
 - [ ] Image optimization and CDN
 - [ ] API rate limiting
 - [ ] Database connection pooling
 - [ ] Pagination implementation
+- [ ] Offline-first architecture
 
 ## Quick Start
 
@@ -122,10 +138,15 @@ cd packages/app && npm run android
 
 ### Products
 - `GET /api/v1/products` - Get all products
+- `GET /api/v1/products/search?q=query` - Search products
+- `GET /api/v1/products/my` - Get user's products (protected)
 - `POST /api/v1/products` - Create product (protected)
 - `GET /api/v1/products/:id` - Get product by ID
 - `PUT /api/v1/products/:id` - Update product (protected)
 - `DELETE /api/v1/products/:id` - Delete product (protected)
+
+### User Profile
+- `PUT /api/v1/auth/profile` - Update user profile (protected)
 
 
 
@@ -178,7 +199,7 @@ Vyeya/
 ## Development
 
 ### Test Authentication
-- **Existing User**: `seller@vyeya.com` / `password`
+- **Existing Grower**: `grower@vyeya.com` / `password`
 - **New Users**: Use signup form with unique email addresses
 
 ### Troubleshooting

@@ -4,7 +4,8 @@ import cors from 'cors';
 import { productRoutes } from './routes/products';
 import { userRoutes } from './routes/users';
 import { storeRoutes } from './routes/stores';
-import { authRoutes } from './routes/auth';
+import authRoutes from './routes/auth';
+import { orderRoutes } from './routes/orders';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/stores', storeRoutes);
+app.use('/api/v1/orders', orderRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

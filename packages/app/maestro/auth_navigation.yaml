@@ -1,0 +1,31 @@
+appId: com.vyeya
+---
+# Clear app state to ensure we start from login screen
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible: 
+      id: "auth-title"
+    timeout: 15000
+
+# Verify initial state - should be login mode
+- assertVisible: "Login to Vyeya"
+- assertVisible: "Need an account? Sign Up"
+
+# Test switching to signup mode
+- tapOn: "Need an account? Sign Up"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# After tapping signup, verify the UI changed
+- assertVisible: "Sign Up to Vyeya"
+- assertVisible: "Already have an account? Login"
+
+# Test switching back to login mode
+- tapOn: "Already have an account? Login"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify we're back to login mode
+- assertVisible: "Login to Vyeya"
+- assertVisible: "Need an account? Sign Up"

@@ -1,0 +1,20 @@
+appId: com.vyeya
+---
+# Clear app state to ensure we start from login screen (not logged-in state)
+- clearState
+- launchApp
+# Wait for app to load - should go to auth screen after clearing state
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Wait for loading to complete and auth screen to appear
+- extendedWaitUntil:
+    visible: 
+      id: "auth-title"
+    timeout: 20000
+
+- assertVisible: 
+    id: "email-input"
+- assertVisible:
+    id: "password-input"
+- assertVisible: "LOGIN"

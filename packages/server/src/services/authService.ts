@@ -11,6 +11,9 @@ export interface User {
   password: string;
   role: string;
   name: string;
+  bio?: string;
+  phone?: string;
+  location?: string;
 }
 
 export const generateToken = (userId: string): string => {
@@ -41,14 +44,14 @@ export const findUserById = async (id: string): Promise<User | null> => {
 
 export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
   const { email, password, name, role } = userData;
-  const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+  
   const userId = String(Date.now());
   
-  console.log('Creating user:', { userId, email, name, role: capitalizedRole });
+  console.log('Creating user:', { userId, email, name, role });
   
   const result = await pool.query(
     'INSERT INTO users (id, email, password, name, role) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-    [userId, email, password, name, capitalizedRole]
+    [userId, email, password, name, role]
   );
   
   console.log('User created:', result.rows[0]);

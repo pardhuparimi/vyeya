@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, role?: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (profileData: { name: string; email: string }) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -105,8 +106,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
   };
 
+  const updateProfile = async (profileData: { name: string; email: string }) => {
+    const response = await fetch('http://10.0.2.2:3000/api/v1/auth/profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Update failed');
+    }
+
+    const data = await response.json();
+    setUser(data.user);
+    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, updateProfile, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

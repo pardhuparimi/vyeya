@@ -27,8 +27,10 @@ const AuthScreen = () => {
   };
 
   return (
-    <View style={tw`flex-1 justify-center items-center p-4`}>
-      <Text style={tw`text-2xl font-bold mb-4`}>{isSignup ? 'Sign Up' : 'Login'} to Vyeya</Text>
+    <View style={tw`flex-1 justify-center items-center p-4`} testID="auth-screen">
+      <Text style={tw`text-2xl font-bold mb-4`} testID="auth-title">
+        {isSignup ? 'Sign Up' : 'Login'} to Vyeya
+      </Text>
       
       {isSignup && (
         <TextInput
@@ -36,6 +38,7 @@ const AuthScreen = () => {
           placeholder="Full Name"
           value={name}
           onChangeText={setName}
+          testID="name-input"
         />
       )}
       
@@ -46,6 +49,7 @@ const AuthScreen = () => {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        testID="email-input"
       />
       <TextInput
         style={tw`w-full border border-gray-300 rounded-md p-2 mb-4`}
@@ -53,16 +57,20 @@ const AuthScreen = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        testID="password-input"
       />
-      <Button
-        title={isLoading ? (isSignup ? 'Signing up...' : 'Logging in...') : (isSignup ? 'Sign Up' : 'Login')}
-        onPress={handleAuth}
-        disabled={isLoading}
-      />
+      <View testID="auth-button">
+        <Button
+          title={isLoading ? (isSignup ? 'Signing up...' : 'Logging in...') : (isSignup ? 'Sign Up' : 'Login')}
+          onPress={handleAuth}
+          disabled={isLoading}
+        />
+      </View>
       
       <TouchableOpacity 
         style={tw`mt-4`}
         onPress={() => setIsSignup(!isSignup)}
+        testID="toggle-auth-mode"
       >
         <Text style={tw`text-blue-500`}>
           {isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up'}
