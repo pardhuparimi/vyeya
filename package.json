@@ -1,10 +1,57 @@
 {
 	"name": "vyeya-monorepo",
+	"version": "1.0.0",
 	"private": true,
 	"workspaces": [
 		"packages/*"
 	],
+	"packageManager": "pnpm@9.15.0",
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=9.0.0"
+	},
 	"scripts": {
-		"clean": "rm -rf node_modules packages/*/node_modules"
+		"clean": "rm -rf node_modules packages/*/node_modules",
+		"dev": "pnpm -r dev",
+		"build": "pnpm -r build",
+		"build:server": "pnpm --filter server build",
+		"build:app": "pnpm --filter app build",
+		"test": "pnpm -r test",
+		"test:unit": "pnpm -r test:unit",
+		"test:integration": "pnpm -r test:integration",
+		"test:e2e": "pnpm --filter app test:e2e",
+		"test:coverage": "pnpm -r test:coverage",
+		"lint": "pnpm -r lint",
+		"lint:fix": "pnpm -r lint:fix",
+		"type-check": "pnpm -r type-check",
+		"db:migrate": "pnpm --filter server db:migrate",
+		"db:seed": "pnpm --filter server db:seed",
+		"docker:build": "docker build -t vyeya-api -f packages/server/Dockerfile .",
+		"docker:run": "docker run -p 3000:3000 vyeya-api",
+		"infra:init": "cd infrastructure && terraform init",
+		"infra:plan": "cd infrastructure && terraform plan",
+		"infra:apply": "cd infrastructure && terraform apply",
+		"infra:destroy": "cd infrastructure && terraform destroy",
+		"infra:plan:dev": "cd infrastructure && terraform plan -var-file=environments/dev.tfvars",
+		"infra:plan:qa": "cd infrastructure && terraform plan -var-file=environments/qa.tfvars",
+		"infra:plan:prod": "cd infrastructure && terraform plan -var-file=environments/prod.tfvars",
+		"infra:apply:dev": "cd infrastructure && terraform apply -var-file=environments/dev.tfvars",
+		"infra:apply:qa": "cd infrastructure && terraform apply -var-file=environments/qa.tfvars",
+		"infra:apply:prod": "cd infrastructure && terraform apply -var-file=environments/prod.tfvars",
+		"security:audit": "pnpm audit --audit-level high",
+		"security:scan": "docker run --rm -v $(pwd):/app aquasec/trivy fs /app",
+		"load:test": "k6 run packages/server/k6-load-test.js",
+		"health:check": "curl -f http://localhost:3000/health || exit 1",
+		"env:check": "./scripts/check-local-env.sh",
+		"env:setup": "./scripts/production-setup.sh",
+		"aws:setup": "./scripts/aws-quick-setup.sh"
+	},
+	"devDependencies": {
+		"@types/node": "^20.19.11",
+		"typescript": "^5.0.4",
+		"eslint": "^8.57.1",
+		"prettier": "^3.1.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^15.2.0"
 	}
 }

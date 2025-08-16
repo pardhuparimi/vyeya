@@ -1,4 +1,274 @@
-# Vyeya - Direct Producer-to-Consumer Marketplace
+# 🚀 Vyeya Platform - Production-Ready E-commerce
+
+> **Enterprise-grade React Native + Node.js platform with automated AWS deployment**
+
+[![CI/CD Pipeline](https://github.com/pardhuparimi/vyeya/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/pardhuparimi/vyeya/actions)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.80+-blue.svg)](https://reactnative.dev/)
+[![AWS](https://img.shields.io/badge/AWS-Production%20Ready-orange.svg)](https://aws.amazon.com/)
+
+## 🎯 Quick Start (5 Minutes)
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/pardhuparimi/vyeya.git
+cd vyeya && ./scripts/production-setup.sh
+
+# 2. Setup AWS (one-time)
+aws configure  # Add your AWS credentials
+pnpm aws:setup  # Auto-configure AWS resources
+
+# 3. Deploy infrastructure
+pnpm infra:apply:dev    # Deploy development environment
+pnpm infra:apply:prod   # Deploy production environment
+
+# 4. Start developing
+pnpm dev               # Start all services locally
+```
+
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PRODUCTION PLATFORM                      │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│   DEVELOPMENT   │       QA        │      PRODUCTION         │
+│                 │                 │                         │
+│ • develop branch│ • release/*     │ • main branch           │
+│ • Cost optimized│ • Full testing  │ • High availability     │
+│ • Fast iteration│ • Staging env   │ • Auto-scaling          │
+└─────────────────┴─────────────────┴─────────────────────────┘
+│
+├── 📱 Mobile Apps (React Native)
+│   ├── Android (Google Play Store ready)
+│   └── iOS (Apple App Store ready)
+│
+├── 🖥️ Backend API (Node.js 22 + TypeScript)
+│   ├── REST API with Express
+│   ├── PostgreSQL database
+│   └── Health monitoring
+│
+└── ☁️ AWS Infrastructure (Auto-configured)
+    ├── ECS Fargate (Container orchestration)
+    ├── RDS PostgreSQL (Managed database)
+    ├── Application Load Balancer (High availability)
+    ├── ECR (Container registry)
+    ├── CloudWatch (Monitoring & alerts)
+    └── VPC (Network security)
+```
+
+## ✨ Key Features
+
+### 🔄 **Automated CI/CD Pipeline**
+- **Multi-environment deployment** (dev/qa/prod)
+- **Security scanning** (Trivy, npm audit, CodeQL)
+- **Performance testing** (k6 load testing)
+- **E2E testing** (Maestro mobile testing)
+- **Zero-downtime deployments** (Blue/green strategy)
+
+### 📱 **Mobile-First Design**
+- **React Native 0.80+** with TypeScript
+- **Android & iOS** app store ready builds
+- **Automated signing** and deployment
+- **E2E testing** with Maestro
+- **Performance optimized** bundles
+
+### ⚡ **Modern Backend Stack**
+- **Node.js 22** (latest LTS)
+- **TypeScript** for type safety
+- **Express.js** with modular architecture
+- **PostgreSQL** with connection pooling
+- **Health checks** and monitoring
+
+### ☁️ **Production AWS Infrastructure**
+- **Auto-scaling ECS Fargate** clusters
+- **RDS PostgreSQL** with automated backups
+- **CloudWatch** monitoring and alerting
+- **VPC security** with isolated networks
+- **Load balancer** with health checks
+
+### 🛡️ **Security & Best Practices**
+- **Container security** scanning
+- **Dependency vulnerability** auditing
+- **Network isolation** with VPC
+- **Encrypted communication** (HTTPS/TLS)
+- **IAM least privilege** access
+
+## 📋 Environment Guide
+
+| Environment | Purpose | Branch | Auto-Deploy | Infrastructure |
+|-------------|---------|--------|-------------|----------------|
+| **Development** | Rapid development & testing | `develop` | ✅ Every push | Minimal (cost-effective) |
+| **QA** | User acceptance testing | `release/*` | ✅ Release branches | Production-like |
+| **Production** | Live user traffic | `main` | ✅ After QA approval | High-availability |
+
+### 🔧 Development Environment
+- **Fast deployment** (2-3 minutes)
+- **Debug logging** enabled
+- **Test database** with seed data
+- **Cost optimized** resources
+
+### 🧪 QA Environment  
+- **Full test suite** execution
+- **Production-like** data volumes
+- **Performance testing** validation
+- **Security scanning** comprehensive
+
+### 🚀 Production Environment
+- **Zero-downtime** deployments
+- **Auto-scaling** based on traffic
+- **Real-time monitoring** and alerting
+- **Automated backups** and recovery
+
+## 📱 Mobile App Store Deployment
+
+### 🤖 Android (Google Play Store)
+```bash
+# Automated CI/CD builds signed APK/AAB
+# Download from GitHub Actions artifacts
+# Upload to Google Play Console
+# Review process: 1-3 days
+
+# Quick commands:
+cd packages/app/android && ./gradlew bundleRelease  # Manual build
+```
+
+### 🍎 iOS (Apple App Store)  
+```bash
+# Automated CI/CD uploads to TestFlight
+# Submit for App Store review
+# Review process: 1-3 days
+
+# Quick commands:
+cd packages/app/ios && open Vyeya.xcworkspace  # Open in Xcode
+```
+
+**📋 See [Mobile App Store Deployment Guide](./MOBILE_APP_STORE_DEPLOYMENT.md) for detailed instructions**
+
+## ⚙️ AWS Configuration (Simplified)
+
+### Minimal Setup Required
+```bash
+# Only these need configuration:
+AWS_ACCESS_KEY_ID=your-aws-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret  
+ALERT_EMAIL=your-email@company.com  # For CloudWatch alerts
+```
+
+### Auto-Configured Resources
+- ✅ **VPC** with public/private subnets
+- ✅ **ECS Fargate** clusters with auto-scaling
+- ✅ **RDS PostgreSQL** with automated backups
+- ✅ **Application Load Balancer** with health checks
+- ✅ **CloudWatch** monitoring and dashboards
+- ✅ **ECR** container registry
+- ✅ **Security Groups** with minimal required access
+- ✅ **IAM Roles** with least privilege
+
+### Environment-Specific Scaling
+```bash
+# Development: 1-3 tasks, db.t3.micro (cost-optimized)
+# QA: 2-5 tasks, db.t3.small (production-like)  
+# Production: 3-20 tasks, db.r6g.large (high-performance)
+```
+
+## 🛠️ Development Commands
+
+```bash
+# Quick start
+pnpm env:check           # Check environment consistency
+pnpm env:setup           # Run full production setup
+pnpm aws:setup           # Configure AWS resources
+
+# Development
+pnpm dev                 # Start all services locally
+pnpm test                # Run all tests
+pnpm lint                # Code linting
+pnpm type-check         # TypeScript checking
+
+# Mobile development
+pnpm android            # Run Android app
+pnpm ios                # Run iOS app  
+pnpm test:e2e          # E2E tests with Maestro
+
+# Infrastructure
+pnpm infra:plan:dev     # Plan dev infrastructure changes
+pnpm infra:apply:dev    # Deploy dev infrastructure
+pnpm infra:plan:prod    # Plan prod infrastructure changes
+pnpm infra:apply:prod   # Deploy prod infrastructure
+
+# Quality assurance
+pnpm security:audit    # Security vulnerability audit
+pnpm load:test         # Performance load testing
+pnpm health:check      # API health validation
+```
+
+## 📊 Monitoring & Observability
+
+### CloudWatch Dashboards
+- **API Performance**: Response times, throughput, error rates
+- **Infrastructure**: CPU, memory, network utilization
+- **Database**: Connections, query performance, locks
+- **Mobile Apps**: Crash reports, user sessions
+
+### Automated Alerts (Production)
+- 🚨 API response time > 2 seconds
+- 🚨 Error rate > 5%
+- 🚨 CPU utilization > 80%
+- 🚨 Memory utilization > 85%
+- 🚨 Database connection issues
+
+## 🔒 Security Features
+
+- **Container vulnerability scanning** with Trivy
+- **Dependency security auditing** with npm audit
+- **Static code analysis** with CodeQL
+- **Network isolation** with VPC and security groups
+- **Encrypted communication** (HTTPS/TLS everywhere)
+- **Secrets management** via AWS Secrets Manager
+- **IAM least privilege** access policies
+
+## 📚 Documentation
+
+- 📖 **[Complete Setup Guide](./COMPLETE_SETUP_GUIDE.md)** - Comprehensive setup instructions
+- 📱 **[Mobile App Store Deployment](./MOBILE_APP_STORE_DEPLOYMENT.md)** - App store deployment guide  
+- 🏗️ **[Production Deployment](./PRODUCTION_DEPLOYMENT.md)** - Infrastructure deployment guide
+- 🔧 **[Backend Documentation](./BACKEND.md)** - API and server documentation
+- 🛠️ **[Setup Guide](./SETUP.md)** - Basic setup instructions
+- 🔍 **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
+
+## 🎯 Production Readiness Checklist
+
+- ✅ **Node.js 22+** with modern tooling
+- ✅ **Three-tier infrastructure** (dev/qa/prod)
+- ✅ **Automated CI/CD pipeline** with quality gates
+- ✅ **Security scanning** and vulnerability management
+- ✅ **Performance testing** and load validation
+- ✅ **Mobile app store** deployment ready
+- ✅ **Monitoring and alerting** comprehensive
+- ✅ **Auto-scaling** and high availability
+- ✅ **Backup and recovery** strategies
+- ✅ **Documentation** complete
+
+## 🚀 Getting Started
+
+1. **Clone**: `git clone https://github.com/pardhuparimi/vyeya.git`
+2. **Setup**: `cd vyeya && ./scripts/production-setup.sh`
+3. **AWS**: `aws configure && pnpm aws:setup`
+4. **Deploy**: `pnpm infra:apply:dev`
+5. **Develop**: `pnpm dev`
+
+**🎉 You're ready for production! 🚀**
+
+## 📞 Support & Contributing
+
+- **Issues**: [GitHub Issues](https://github.com/pardhuparimi/vyeya/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/pardhuparimi/vyeya/discussions)
+- **Contributing**: See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+---
+
+**Built with ❤️ for production-scale applications** - Direct Producer-to-Consumer Marketplace
 
 Vyeya is a native mobile app (iOS and Android) connecting local produce growers directly with consumers, eliminating middlemen and ensuring fair prices. Whether you're a farmer, backyard gardener, or small-scale grower, this platform empowers you to sell your fresh produce directly to your community while providing consumers with fresh, affordable local products.
 

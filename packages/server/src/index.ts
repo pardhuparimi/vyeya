@@ -6,6 +6,7 @@ import { userRoutes } from './routes/users';
 import { storeRoutes } from './routes/stores';
 import authRoutes from './routes/auth';
 import { orderRoutes } from './routes/orders';
+import healthRoutes from './routes/health';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,26 +15,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Health check
-app.get('/health', async (req, res) => {
-  try {
-    const pool = require('./config/database').default;
-    const result = await pool.query('SELECT COUNT(*) FROM users');
-    res.json({ 
-      status: 'OK', 
-      timestamp: new Date().toISOString(),
-      database: 'connected',
-      userCount: result.rows[0].count
-    });
-  } catch (error) {
-    res.json({ 
-      status: 'ERROR', 
-      timestamp: new Date().toISOString(),
-      database: 'disconnected',
-      error: (error as Error).message
-    });
-  }
-});
+// Health check routes
+app.use('/', healthRoutes);
 
 // API routes
 app.use('/api/v1/auth', authRoutes);

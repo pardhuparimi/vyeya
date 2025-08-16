@@ -1,13 +1,26 @@
 {
-  "name": "Vyeya",
+  "name": "vyeya-app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "e2e:android": "maestro test maestro/ --platform android",
+    "e2e:ios": "maestro test maestro/ --platform ios",
+    "e2e:ci": "maestro test maestro/comprehensive_test.yaml",
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:ios": "xcodebuild -workspace ios/Vyeya.xcworkspace -scheme Vyeya -configuration Release",
+    "bundle:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
+    "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle",
+    "clean": "react-native clean-project-auto",
+    "postinstall": "cd ios && pod install"
   },
   "dependencies": {
     "@babel/runtime": "7.28.2",
