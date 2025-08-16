@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { Text, FlatList, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
 import { IProduct } from '../../../shared/src';
 import { useNavigation } from '@react-navigation/native';

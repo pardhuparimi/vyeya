@@ -4,7 +4,7 @@ export const formatPrice = (price: number): string => {
 };
 
 export const validatePhoneNumber = (phone: string): boolean => {
-  const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+  const phoneRegex = /^\+?[\d\s\-()]{10,}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 

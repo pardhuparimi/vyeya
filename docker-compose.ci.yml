@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # CI/CD Testing Environment
+  ci-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - pnpm-store:/root/.pnpm-store
+    environment:
+      - NODE_ENV=test
+      - CI=true
+      - PNPM_HOME=/root/.pnpm
+    depends_on:
+      - postgres-test
+      - redis-test
+    command: /bin/bash
+
+  # Test Database
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vyeya_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d vyeya_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Redis
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Server for integration testing
+  api-test:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://test:test@postgres-test:5432/vyeya_test
+      - REDIS_URL=redis://redis-test:6379
+      - JWT_SECRET=test-secret-key-for-ci-testing
+      - NODE_ENV=test
+      - PORT=3000
+    ports:
+      - "3001:3000"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    command: ["npm", "start"]
+
+volumes:
+  pnpm-store:
+  postgres-test-data:

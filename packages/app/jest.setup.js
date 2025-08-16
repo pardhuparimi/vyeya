@@ -1,3 +1,4 @@
+/* eslint-env jest */
 // Jest setup for React Native
 import 'react-native-gesture-handler/jestSetup';
 

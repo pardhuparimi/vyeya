@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { View, Text, Animated } from 'react-native';
+import { View, Text } from 'react-native';
 import tw from 'twrnc';
 
 interface NotificationContextType {

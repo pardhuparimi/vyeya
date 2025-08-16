@@ -5,7 +5,7 @@ import { IProduct } from '../../../shared/src';
 import { getProducts } from '../services/product.service';
 import ProductList from '../components/ProductList';
 
-const BrowseScreen = ({ navigation }: any) => {
+const BrowseScreen = ({ navigation: _navigation }: any) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

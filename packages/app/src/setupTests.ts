@@ -17,4 +17,6 @@ jest.mock('react-native', () => {
 });
 
 // Global test setup
-(global as any).__DEV__ = true;
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any).__DEV__ = true;
+}
