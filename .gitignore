@@ -2,10 +2,10 @@
 node_modules/
 packages/*/node_modules/
 
-# Lock files (should not be committed in monorepos)
+# Lock files (package-lock.json and yarn.lock should not be committed when using pnpm)
 package-lock.json
-pnpm-lock.yaml
 yarn.lock
+# Note: pnpm-lock.yaml SHOULD be committed for reproducible builds
 
 # Build outputs
 packages/app/android/build/
