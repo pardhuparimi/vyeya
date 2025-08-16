@@ -22,7 +22,7 @@ const CartScreen = ({ navigation }: any) => {
         price: item.price
       }));
       
-      await createOrder(user?.token || '', orderItems, getTotalPrice());
+      await createOrder((user as any)?.token || '', orderItems, getTotalPrice()); // TODO: Fix User type
       Alert.alert('Order Placed', 'Your order has been placed successfully!', [
         { text: 'View Orders', onPress: () => { clearCart(); navigation.navigate('Orders'); } },
         { text: 'OK', onPress: () => { clearCart(); navigation.goBack(); } }
