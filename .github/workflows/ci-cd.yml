@@ -49,7 +49,7 @@ jobs:
       - name: 🧪 Unit Tests
         run: |
           cd packages/server
-          pnpm test --coverage --maxWorkers=2
+          pnpm test:coverage -- --maxWorkers=2
       
       - name: 🔒 Security Scan
         uses: aquasecurity/trivy-action@master
@@ -70,19 +70,29 @@ jobs:
       - name: Determine deployment
         id: check
         run: |
+          echo "🔍 Current branch: ${{ github.ref }}"
+          
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "should-deploy=true" >> $GITHUB_OUTPUT
             echo "environment=production" >> $GITHUB_OUTPUT
+            echo "✅ Deploying to PRODUCTION"
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
             echo "should-deploy=true" >> $GITHUB_OUTPUT
             echo "environment=dev" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            echo "✅ Deploying to DEV"
+          elif [[ "${{ github.ref }}" == "refs/heads/release/"* ]]; then
             echo "should-deploy=true" >> $GITHUB_OUTPUT
             echo "environment=qa" >> $GITHUB_OUTPUT
+            echo "✅ Deploying to QA"
           else
             echo "should-deploy=false" >> $GITHUB_OUTPUT
             echo "environment=none" >> $GITHUB_OUTPUT
+            echo "❌ No deployment (feature branch or PR)"
           fi
+          
+          echo "📝 Outputs set:"
+          echo "  should-deploy: $(grep should-deploy $GITHUB_OUTPUT | cut -d= -f2)"
+          echo "  environment: $(grep environment $GITHUB_OUTPUT | cut -d= -f2)"
 
   # Phase 2: Integration Tests (only if deploying)
   integration:
@@ -192,10 +202,11 @@ jobs:
       - name: 🚀 Deploy to ${{ needs.quality-gate.outputs.environment }}
         id: deploy
         run: |
-          echo "🚀 Deploying to ${{ needs.quality-gate.outputs.environment }}"
+          ENVIRONMENT="${{ needs.quality-gate.outputs.environment }}"
+          echo "🚀 Deploying to ${ENVIRONMENT}"
           
           # Set deployment URL based on environment
-          case "${{ needs.quality-gate.outputs.environment }}" in
+          case "${ENVIRONMENT}" in
             "production")
               echo "url=https://vyeya.app" >> $GITHUB_OUTPUT
               ;;
@@ -205,13 +216,20 @@ jobs:
             "qa")
               echo "url=https://qa.vyeya.app" >> $GITHUB_OUTPUT
               ;;
+            *)
+              echo "url=https://unknown.vyeya.app" >> $GITHUB_OUTPUT
+              echo "⚠️ Unknown environment: ${ENVIRONMENT}"
+              ;;
           esac
+          
+          echo "📦 Environment: ${ENVIRONMENT}"
+          echo "🌐 URL will be: $(cat $GITHUB_OUTPUT | grep url= | cut -d= -f2)"
           
           # Add your actual deployment commands here based on environment
           # Examples:
-          # aws ecs update-service --cluster vyeya-${{ needs.quality-gate.outputs.environment }}
-          # kubectl apply -f k8s/${{ needs.quality-gate.outputs.environment }}/
-          # terraform apply -var-file=environments/${{ needs.quality-gate.outputs.environment }}.tfvars
+          # aws ecs update-service --cluster vyeya-${ENVIRONMENT}
+          # kubectl apply -f k8s/${ENVIRONMENT}/
+          # terraform apply -var-file=environments/${ENVIRONMENT}.tfvars
 
   # Phase 4: Post-Deploy Validation (only for production)
   post-deploy:
