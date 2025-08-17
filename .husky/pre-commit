@@ -1,0 +1,74 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if we're in the root directory
+if [ ! -f "package.json" ]; then
+  echo "❌ Must run git commands from repository root"
+  exit 1
+fi
+
+# Install dependencies if node_modules doesn't exist
+if [ ! -d "node_modules" ]; then
+  echo "📦 Installing dependencies..."
+  pnpm install
+fi
+
+# Run linting for backend
+echo "🔍 Linting backend code..."
+cd packages/server
+if ! pnpm lint; then
+  echo "❌ Backend linting failed. Run 'pnpm lint:fix' to auto-fix issues."
+  exit 1
+fi
+
+# Run type checking for backend
+echo "🔍 Type checking backend..."
+if ! pnpm type-check; then
+  echo "❌ Backend type checking failed."
+  exit 1
+fi
+
+# Run type checking for shared package
+echo "🔍 Type checking shared package..."
+cd ../shared
+if ! pnpm type-check; then
+  echo "❌ Shared package type checking failed."
+  exit 1
+fi
+
+# Run unit tests for backend
+echo "🧪 Running backend unit tests..."
+cd ../server
+if ! pnpm test:unit; then
+  echo "❌ Backend unit tests failed."
+  exit 1
+fi
+
+# Check for common issues
+echo "🔍 Checking for common issues..."
+cd ../..
+
+# Check for merge conflict markers
+if grep -r "^<<<<<<< \|^>>>>>>> \|^=======$" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" .; then
+  echo "❌ Merge conflict markers found in code"
+  exit 1
+fi
+
+# Check for TODO/FIXME comments in staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|js|tsx|jsx)$' || true)
+if [ ! -z "$staged_files" ]; then
+  if echo "$staged_files" | xargs grep -l "TODO\|FIXME" 2>/dev/null; then
+    echo "⚠️  Warning: TODO/FIXME comments found in staged files"
+    echo "   Consider addressing these before committing"
+  fi
+fi
+
+# Check for console.log statements in non-test files
+if echo "$staged_files" | grep -v "test\|spec" | xargs grep -l "console\.log" 2>/dev/null; then
+  echo "⚠️  Warning: console.log statements found in non-test files"
+  echo "   Consider removing or replacing with proper logging"
+fi
+
+echo "✅ Pre-commit checks passed!"

@@ -1,0 +1,13 @@
+{
+  "*.{js,ts,tsx}": [
+    "eslint --fix",
+    "prettier --write"
+  ],
+  "*.{json,md,yml,yaml}": [
+    "prettier --write"
+  ],
+  "packages/server/src/**/*.{js,ts}": [
+    "cd packages/server && pnpm lint:fix",
+    "cd packages/server && pnpm type-check"
+  ]
+}
