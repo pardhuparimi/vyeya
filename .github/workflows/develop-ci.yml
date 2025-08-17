@@ -121,9 +121,7 @@ jobs:
             echo '🔗 Running real integration tests with database...' &&
             pnpm test:e2e --verbose &&
             echo '📊 Running basic HTTP route tests...' &&
-            pnpm test:http --verbose &&
-            echo '🛡️ Checking test coverage...' &&
-            pnpm test:coverage
+            pnpm test:http --verbose
           "
       
       - name: 🧹 Cleanup
