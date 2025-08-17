@@ -1,4 +1,4 @@
-appId: com.vyeya
+appId: org.reactjs.native.example.Vyeya
 ---
 # Test 1: App Launch and Loading Flow with clean state
 # Clear app state to ensure we start from login screen

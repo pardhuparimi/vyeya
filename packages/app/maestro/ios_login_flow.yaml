@@ -1,0 +1,50 @@
+appId: org.reactjs.native.example.Vyeya
+---
+# Clear app state to ensure we start from login screen
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible: 
+      id: "auth-title"
+    timeout: 15000
+
+# Test basic UI elements first
+- assertVisible: 
+    id: "email-input"
+- assertVisible:
+    id: "password-input"
+- assertVisible: "LOGIN"
+
+# Test navigation toggle functionality first (before login)
+- tapOn: "Need an account? Sign Up"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Sign Up to Vyeya"
+- assertVisible: "Already have an account? Login"
+
+# Switch back to login
+- tapOn: "Already have an account? Login"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Login to Vyeya"
+
+# Now test login flow with valid credentials from our backend
+- tapOn:
+    id: "email-input"
+- eraseText
+- inputText: "seller@vyeya.com"
+
+- tapOn:
+    id: "password-input"  
+- eraseText
+- inputText: "password"
+
+# Submit login - should succeed and navigate away
+- tapOn: "LOGIN"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# After successful login, we should navigate away from auth screen
+# The auth-title should no longer be visible
+- assertNotVisible:
+    id: "auth-title"

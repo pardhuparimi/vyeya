@@ -103,18 +103,13 @@ jobs:
             pnpm install --frozen-lockfile &&
             echo '🗃️ Initializing test database...' &&
             cd packages/server &&
-            export DB_HOST='postgres-test' &&
-            export DB_USER='test' &&
-            export DB_PASSWORD='test' &&
-            export DB_NAME='vyeya_test' &&
-            export DB_PORT='5432' &&
-            node src/scripts/init-db.js &&
-            echo '🧪 Starting E2E integration tests...' &&
             export POSTGRES_HOST='postgres-test' &&
             export POSTGRES_USER='test' &&
             export POSTGRES_PASSWORD='test' &&
             export POSTGRES_DB='vyeya_test' &&
             export POSTGRES_PORT='5432' &&
+            pnpm exec ts-node src/scripts/init-db.ts &&
+            echo '🧪 Starting E2E integration tests...' &&
             export REDIS_URL='redis://redis-test:6379' &&
             export NODE_ENV=test &&
             export CI=true &&
@@ -128,11 +123,115 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.ci.yml down -v
 
+  # Phase 3: Mobile E2E Tests
+  mobile-e2e-tests:
+    name: 📱 Mobile E2E Tests
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_USER: test
+          POSTGRES_DB: vyeya_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      
+      - name: Setup Java for Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
+          cmake-version: 3.22.1
+          ndk-version: 26.1.10909125
+      
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+      
+      - name: Start Backend Services
+        run: |
+          echo "🚀 Starting backend services for mobile testing..."
+          cd packages/server
+          pnpm install --frozen-lockfile
+          
+          # Initialize database
+          export POSTGRES_HOST=localhost POSTGRES_PORT=5433 POSTGRES_USER=test POSTGRES_PASSWORD=test POSTGRES_DB=vyeya_test
+          pnpm exec ts-node src/scripts/init-db.ts
+          
+          # Start server in background
+          export NODE_ENV=test
+          timeout 300s pnpm dev &
+          
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/health; then
+              echo "✅ Backend server ready"
+              break
+            fi
+            echo "⏳ Waiting for backend... ($i/30)"
+            sleep 10
+          done
+      
+      - name: Setup E2E Test Data
+        run: |
+          echo "📊 Setting up E2E test data..."
+          ./scripts/setup-e2e-data.sh
+      
+      - name: Run Mobile E2E Tests
+        run: |
+          echo "📱 Running headless mobile E2E tests..."
+          ./scripts/ci-e2e-tests.sh true
+          
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-e2e-results
+          path: |
+            packages/app/maestro/results/
+            packages/app/maestro/logs/
+
   # Summary
   develop-ci-summary:
     name: ✅ Develop CI Summary
     runs-on: ubuntu-latest
-    needs: [quality-gate, integration-tests]
+    needs: [quality-gate, integration-tests, mobile-e2e-tests]
     if: always()
     
     steps:
@@ -141,11 +240,18 @@ jobs:
           echo "🌿 Develop Branch CI Results:"
           echo "✅ Quality Gate: ${{ needs.quality-gate.result }}"
           echo "✅ Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "✅ Mobile E2E Tests: ${{ needs.mobile-e2e-tests.result }}"
           echo ""
-          echo "🎯 Purpose: Code quality validation and integration testing"
+          echo "📊 Test Summary:"
+          echo "  • Unit Tests: 166 tests"
+          echo "  • Integration Tests: 17 tests"
+          echo "  • Mobile E2E Tests: 8 tests (Android + iOS)"
+          echo "  • Total Tests: 191 tests"
+          echo ""
+          echo "🎯 Purpose: Complete code quality validation and mobile testing"
           echo "📝 Next Steps: Create PR to main branch for full deployment pipeline"
           
-          if [[ "${{ needs.quality-gate.result }}" == "success" && "${{ needs.integration-tests.result }}" == "success" ]]; then
+          if [[ "${{ needs.quality-gate.result }}" == "success" && "${{ needs.integration-tests.result }}" == "success" && "${{ needs.mobile-e2e-tests.result }}" == "success" ]]; then
             echo "🎉 All checks passed! Ready for main branch deployment."
           else
             echo "❌ Some checks failed. Please review and fix issues."

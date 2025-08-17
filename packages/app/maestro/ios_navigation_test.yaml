@@ -1,0 +1,33 @@
+appId: org.reactjs.native.example.Vyeya
+---
+# Clear app state to ensure we start from login screen (not logged-in state)
+- clearState
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Wait for loading to complete and auth screen to appear
+- extendedWaitUntil:
+    visible: 
+      id: "auth-title"
+    timeout: 20000
+
+# Test basic UI elements
+- assertVisible: 
+    id: "auth-title"
+- assertVisible: "Login to Vyeya"
+- assertVisible: "Need an account? Sign Up"
+
+# Test navigation to Sign Up
+- tapOn: "Need an account? Sign Up"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Sign Up to Vyeya"
+- assertVisible: "Already have an account? Login"
+
+# Test navigation back to Login
+- tapOn: "Already have an account? Login"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Login to Vyeya"
+- assertVisible: "Need an account? Sign Up"

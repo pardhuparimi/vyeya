@@ -1,0 +1,102 @@
+# Simplified Mobile App Docker Container
+FROM node:22-bullseye AS base
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+ENV ANDROID_HOME=/opt/android-sdk
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    openjdk-11-jdk \
+    git \
+    curl \
+    build-essential \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set PATH with Android tools
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools
+
+# Install pnpm
+RUN npm install -g pnpm@9
+
+# Create android SDK directory
+RUN mkdir -p $ANDROID_HOME/cmdline-tools
+
+# Download and install Android Command Line Tools
+RUN cd /tmp && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
+    unzip -q commandlinetools-linux-9477386_latest.zip && \
+    mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest && \
+    rm commandlinetools-linux-9477386_latest.zip
+
+# Accept licenses and install SDK components
+RUN yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+RUN $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+    "platform-tools" \
+    "platforms;android-34" \
+    "platforms;android-33" \
+    "build-tools;34.0.0" \
+    "build-tools;33.0.0"
+
+# Install React Native CLI
+RUN npm install -g @react-native-community/cli
+
+# Development stage
+FROM base AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/app/package.json ./packages/app/
+COPY packages/shared/package.json ./packages/shared/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/packages/app
+
+# Expose Metro bundler port
+EXPOSE 8081
+
+# Create entrypoint
+RUN echo '#!/bin/bash\n\
+echo "🚀 React Native Development Environment"\n\
+echo "📱 Android SDK: $ANDROID_HOME"\n\
+echo "☕ Java: $(java -version 2>&1 | head -1)"\n\
+echo "🔧 Node: $(node --version)"\n\
+adb start-server 2>/dev/null || echo "ADB server start failed"\n\
+exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["pnpm", "start"]
+
+# Builder stage
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy everything needed for build
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/app ./packages/app
+COPY packages/shared ./packages/shared
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build shared package
+RUN cd packages/shared && pnpm build
+
+# Build Android app
+WORKDIR /app/packages/app
+RUN chmod +x android/gradlew
+RUN cd android && ./gradlew assembleDebug
+
+CMD ["echo", "Build completed"]

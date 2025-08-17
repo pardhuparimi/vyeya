@@ -1,8 +1,14 @@
 // Integration tests for HTTP API endpoints (with real HTTP requests)
 import request from 'supertest';
 import app from '../index';
+import { verifyNoMocks } from '../utils/testUtils';
 
 describe('API Integration Tests', () => {
+  beforeEach(() => {
+    // Verify no mocks are being used inappropriately
+    verifyNoMocks();
+  });
+
   describe('Authentication Routes', () => {
     it('should have auth routes mounted', async () => {
       const response = await request(app)

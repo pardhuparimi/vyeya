@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16-alpine
     container_name: vyeya-postgres
     environment:
       POSTGRES_DB: vyeya
@@ -19,6 +19,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # Test Database (matches CI configuration)
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: vyeya-postgres-test
+    environment:
+      POSTGRES_DB: vyeya_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d vyeya_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: vyeya-redis
@@ -26,7 +44,68 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Redis (matches CI configuration)  
+  redis-test:
+    image: redis:7-alpine
+    container_name: vyeya-redis-test
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mobile Development Environment
+  mobile-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.mobile
+    container_name: vyeya-mobile-dev
+    volumes:
+      - ./packages/app:/app/packages/app
+      - ./packages/shared:/app/packages/shared
+      - mobile_node_modules:/app/node_modules
+      - mobile_app_node_modules:/app/packages/app/node_modules
+      - /dev/bus/usb:/dev/bus/usb  # For USB debugging
+    ports:
+      - "8081:8081"  # Metro bundler
+      - "8082:8082"  # Alternative Metro port
+    environment:
+      - NODE_ENV=development
+    privileged: true  # Required for ADB
+    stdin_open: true
+    tty: true
+    depends_on:
+      - postgres
+      - redis
+
+  # Mobile App Builder (for CI/CD)
+  mobile-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.mobile
+      target: builder
+    container_name: vyeya-mobile-builder
+    volumes:
+      - ./packages/app:/app/packages/app:ro
+      - ./packages/shared:/app/packages/shared:ro
+      - mobile_build_output:/app/packages/app/android/app/build/outputs
+    environment:
+      - NODE_ENV=production
+    command: ["./gradlew", "assembleRelease"]
+    working_dir: /app/packages/app/android
 
 volumes:
   postgres_data:
+  postgres-test-data:
   redis_data:
+  mobile_node_modules:
+  mobile_app_node_modules:
+  mobile_build_output:
