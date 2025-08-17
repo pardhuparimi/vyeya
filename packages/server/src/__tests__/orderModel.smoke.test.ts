@@ -7,9 +7,10 @@ jest.mock('../config/database', () => ({
 import pool from '../config/database';
 import { OrderModel } from '../models/Order';
 
+
 describe('OrderModel', () => {
-	let mockQuery = pool.query as jest.Mock;
-	let mockConnect = pool.connect as jest.Mock;
+	const mockQuery = pool.query as jest.Mock;
+	const mockConnect = pool.connect as jest.Mock;
 	let mockClient: any;
 
 	beforeEach(() => {
