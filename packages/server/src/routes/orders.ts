@@ -36,10 +36,10 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-// GET /api/v1/orders/:id - Get order details
+// GET /api/v1/orders/:orderId - Get order details
 router.get('/:orderId', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const order = await OrderModel.findById(req.params.id);
+    const order = await OrderModel.findById(req.params.orderId);
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -48,7 +48,7 @@ router.get('/:orderId', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const items = await OrderModel.getOrderItems(req.params.id);
+    const items = await OrderModel.getOrderItems(req.params.orderId);
     res.json({ order: { ...order, items } });
   } catch (error) {
     console.error('Order fetch error:', error);

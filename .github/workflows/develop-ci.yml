@@ -60,7 +60,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-        continue-on-error: true
 
   # Phase 2: Integration Tests using Docker
   integration-tests:
@@ -114,7 +113,9 @@ jobs:
             echo '🔗 Running real integration tests with database...' &&
             pnpm test:e2e --verbose &&
             echo '📊 Running basic HTTP route tests...' &&
-            pnpm test:http --verbose
+            pnpm test:http --verbose &&
+            echo '🛡️ Checking test coverage...' &&
+            pnpm test:coverage
           "
       
       - name: 🧹 Cleanup

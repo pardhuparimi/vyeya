@@ -40,6 +40,17 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// GET /api/v1/products/my
+router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const products = await ProductModel.findByUserId(req.user?.id || '');
+    res.json(products);
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Failed to fetch your products' });
+  }
+});
+
 // GET /api/v1/products/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -53,17 +64,6 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// GET /api/v1/products/my
-router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
-  try {
-    const products = await ProductModel.findByUserId(req.user?.id || '');
-    res.json(products);
-  } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({ error: 'Failed to fetch your products' });
   }
 });
 

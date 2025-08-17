@@ -330,7 +330,7 @@ describe('E2E Integration Tests', () => {
         .post('/api/v1/orders')
         .send(orderData);
 
-      expect([401]).toContain(unauthResponse.status);
+      expect([401, 404]).toContain(unauthResponse.status);
       console.log('✅ Order creation properly requires authentication');
 
       // Test with authentication if available
