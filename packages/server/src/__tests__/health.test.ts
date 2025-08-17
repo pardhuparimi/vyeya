@@ -159,13 +159,17 @@ describe('Health Routes', () => {
     it('should handle memory warning scenario', async () => {
       // Mock process.memoryUsage to simulate high memory usage
       const originalMemoryUsage = process.memoryUsage;
-      process.memoryUsage = jest.fn().mockReturnValue({
+      const mockMemoryUsage = jest.fn().mockReturnValue({
         rss: 100000000,
         heapTotal: 100000000,
         heapUsed: 95000000, // 95% usage to trigger warning
         external: 1000000,
         arrayBuffers: 1000000
-      }) as any;
+      });
+      Object.defineProperty(process, 'memoryUsage', {
+        value: mockMemoryUsage,
+        configurable: true
+      });
 
       const response = await request(app)
         .get('/health/deep');
@@ -195,13 +199,17 @@ describe('Health Routes', () => {
     it('should return 503 status when health is degraded', async () => {
       // Mock memory usage to force degraded status
       const originalMemoryUsage = process.memoryUsage;
-      process.memoryUsage = jest.fn().mockReturnValue({
+      const mockMemoryUsage = jest.fn().mockReturnValue({
         rss: 100000000,
         heapTotal: 100000000,
         heapUsed: 95000000, // High memory usage
         external: 1000000,
         arrayBuffers: 1000000
-      }) as any;
+      });
+      Object.defineProperty(process, 'memoryUsage', {
+        value: mockMemoryUsage,
+        configurable: true
+      });
 
       const response = await request(app)
         .get('/health/deep');

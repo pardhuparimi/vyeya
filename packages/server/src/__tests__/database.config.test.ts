@@ -1,5 +1,3 @@
-import { Pool } from 'pg';
-
 // Mock environment variables
 const originalEnv = process.env;
 

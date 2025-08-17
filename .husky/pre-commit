@@ -18,8 +18,9 @@ fi
 # Run linting for backend
 echo "🔍 Linting backend code..."
 cd packages/server
-if ! pnpm lint; then
-  echo "❌ Backend linting failed. Run 'pnpm lint:fix' to auto-fix issues."
+if ! pnpm lint:strict; then
+  echo "❌ Backend linting failed. Fix all warnings and errors before committing."
+  echo "💡 Run 'pnpm lint:fix' to auto-fix some issues."
   exit 1
 fi
 
