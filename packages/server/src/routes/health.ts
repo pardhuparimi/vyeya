@@ -39,7 +39,7 @@ router.get('/health/deep', async (req: Request, res: Response) => {
     client.release();
     await pool.end();
     healthCheck.checks.database = 'healthy';
-  } catch (error) {
+  } catch {
     healthCheck.checks.database = 'unhealthy';
     healthCheck.status = 'degraded';
   }
@@ -64,7 +64,7 @@ router.get('/health/deep', async (req: Request, res: Response) => {
     } else {
       healthCheck.checks.redis = 'not_configured';
     }
-  } catch (error) {
+  } catch {
     healthCheck.checks.redis = 'unhealthy';
     healthCheck.status = 'degraded';
   }
@@ -89,7 +89,7 @@ router.get('/ready', async (req: Request, res: Response) => {
       status: 'ready',
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       status: 'not_ready',
       timestamp: new Date().toISOString(),

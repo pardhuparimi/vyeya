@@ -11,7 +11,11 @@ import { OrderModel } from '../models/Order';
 describe('OrderModel', () => {
 	const mockQuery = pool.query as jest.Mock;
 	const mockConnect = pool.connect as jest.Mock;
-	let mockClient: any;
+	type MockDbClient = {
+		query: jest.Mock;
+		release: jest.Mock;
+	};
+	let mockClient: MockDbClient;
 
 	beforeEach(() => {
 		jest.clearAllMocks();

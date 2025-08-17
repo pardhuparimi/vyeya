@@ -26,7 +26,7 @@ app.use('/api/v1/stores', storeRoutes);
 app.use('/api/v1/orders', orderRoutes);
 
 // Error handling
-app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, req: express.Request, res: express.Response) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });

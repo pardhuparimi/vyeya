@@ -16,8 +16,7 @@ router.get('/profile', authenticateToken, async (req: AuthRequest, res) => {
     res.json({
       user: result.rows[0]
     });
-  } catch (error) {
-    console.error('Database error:', error);
+  } catch {
     res.status(500).json({ 
       error: 'Database connection failed',
       message: 'Unable to fetch user profile'
@@ -38,8 +37,7 @@ router.get('/:id', async (req, res) => {
     res.json({
       user: result.rows[0]
     });
-  } catch (error) {
-    console.error('Database error:', error);
+  } catch {
     res.status(500).json({ 
       error: 'Database connection failed',
       message: 'Unable to fetch user'

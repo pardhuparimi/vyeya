@@ -119,7 +119,8 @@ describe('Stores Routes', () => {
       expect(finalRes.body.stores.length).toBe(initialCount + 1);
       
       // Find the created store in the list
-      const createdStore = finalRes.body.stores.find((s: any) => s.id === createRes.body.id);
+  type Store = { id: string; name: string };
+  const createdStore = finalRes.body.stores.find((s: Store) => s.id === createRes.body.id);
       expect(createdStore).toBeDefined();
       expect(createdStore.name).toBe(newStore.name);
     });

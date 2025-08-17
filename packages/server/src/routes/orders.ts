@@ -19,8 +19,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
 
     const order = await OrderModel.create(req.user?.id || '', items, totalAmount);
     res.status(201).json({ order });
-  } catch (error) {
-    console.error('Order creation error:', error);
+  } catch {
     res.status(500).json({ error: 'Failed to create order' });
   }
 });
@@ -30,8 +29,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const orders = await OrderModel.findByUserId(req.user?.id || '');
     res.json({ orders });
-  } catch (error) {
-    console.error('Orders fetch error:', error);
+  } catch {
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
@@ -50,8 +48,7 @@ router.get('/:orderId', authenticateToken, async (req: AuthRequest, res) => {
 
     const items = await OrderModel.getOrderItems(req.params.orderId);
     res.json({ order: { ...order, items } });
-  } catch (error) {
-    console.error('Order fetch error:', error);
+  } catch {
     res.status(500).json({ error: 'Failed to fetch order' });
   }
 });

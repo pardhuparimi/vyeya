@@ -7,9 +7,11 @@ jest.mock('../models/Order');
 
 // Mock auth middleware
 jest.mock('../middleware/auth', () => ({
-  authenticateToken: (req: any, res: any, next: any) => {
-    req.user = { id: 'user123', name: 'Test User', email: 'test@example.com' };
-    next();
+  authenticateToken: (req: Record<string, unknown>, _res: unknown, next: unknown) => {
+    if (typeof req === 'object' && req !== null) {
+      (req as { user?: { id: string; name: string; email: string } }).user = { id: 'user123', name: 'Test User', email: 'test@example.com' };
+    }
+    if (typeof next === 'function') next();
   },
   AuthRequest: {}
 }));

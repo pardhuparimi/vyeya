@@ -161,7 +161,7 @@ describe('ProductModel', () => {
       const locationUpdate = { location: { lat: 41.8781, lng: -87.6298 } };
       poolQuery.mockResolvedValue({ rows: [{ id: '1', ...locationUpdate }] });
 
-      const result = await ProductModel.update('1', locationUpdate);
+      await ProductModel.update('1', locationUpdate);
 
       expect(poolQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE products SET'),

@@ -40,14 +40,15 @@ describe('Product Routes', () => {
   beforeEach(() => {
     // Clear require cache for router and model
     jest.resetModules();
-    delete require.cache[require.resolve('../routes/products')];
-    delete require.cache[require.resolve('../models/Product')];
-    ProductModel = require('../models/Product').ProductModel;
-    app = express();
-    app.use(express.json());
-    // Import the router after mocks are set
-    const { productRoutes } = require('../routes/products');
-    app.use('/api/v1/products', productRoutes);
+    (async () => {
+      const productModule = await import('../models/Product');
+      ProductModel = productModule.ProductModel;
+      app = express();
+      app.use(express.json());
+      // Import the router after mocks are set
+      const { productRoutes } = await import('../routes/products');
+      app.use('/api/v1/products', productRoutes);
+    })();
   });
   afterEach(() => jest.clearAllMocks());
 

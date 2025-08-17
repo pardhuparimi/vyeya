@@ -36,10 +36,10 @@ router.post('/login', async (req, res) => {
         location: user.location
       }
     });
-  } catch (_error) {
+  } catch (error) {
     // Log auth errors in development only
     if (process.env.NODE_ENV !== 'test') {
-      console.error('Login error:', _error);
+      console.error('Login error:', error);
     }
     res.status(500).json({ error: 'Server error' });
   }
@@ -77,10 +77,10 @@ router.post('/register', async (req, res) => {
         location: user.location
       }
     });
-  } catch (_error) {
+  } catch (error) {
     // Log registration errors in development only
     if (process.env.NODE_ENV !== 'test') {
-      console.error('Registration error:', _error);
+      console.error('Registration error:', error);
     }
     res.status(500).json({ error: 'Server error' });
   }
@@ -106,7 +106,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
         location: user.location
       }
     });
-  } catch (_error) {
+  } catch {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -141,7 +141,7 @@ router.put('/profile', authenticateToken, async (req: AuthRequest, res) => {
         location: user.location
       }
     });
-  } catch (_error) {
+  } catch {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -161,7 +161,7 @@ router.get('/grower/:id', async (req, res) => {
     }
     
     res.json({ grower });
-  } catch (_error) {
+  } catch {
     res.status(500).json({ error: 'Server error' });
   }
 });

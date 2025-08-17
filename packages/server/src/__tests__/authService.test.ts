@@ -13,9 +13,16 @@ jest.mock('bcryptjs', () => ({
 }));
 
 // Mock database
-jest.mock('../config/database', () => ({
-  query: jest.fn(),
-}));
+
+// Always return a fresh mock for each test to avoid undefined
+jest.mock('../config/database', () => {
+  const query = jest.fn();
+  return {
+    __esModule: true,
+    default: { query },
+    query,
+  };
+});
 
 describe('AuthService Basic Tests', () => {
   describe('generateToken', () => {
@@ -32,8 +39,8 @@ describe('AuthService Basic Tests', () => {
       });
     });
 
-    it('should call jwt.sign with correct parameters', () => {
-      const jwt = require('jsonwebtoken');
+    it('should call jwt.sign with correct parameters', async () => {
+      const jwt = await import('jsonwebtoken');
       generateToken('test-user');
       expect(jwt.sign).toHaveBeenCalledWith(
         { userId: 'test-user' },
@@ -59,8 +66,8 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should handle password hashing workflow', async () => {
-      const bcrypt = require('bcryptjs');
-      const { hashPassword } = require('../services/authService');
+      const bcrypt = await import('bcryptjs');
+      const { hashPassword } = await import('../services/authService');
       
       const result = await hashPassword('testPassword');
       expect(bcrypt.hash).toHaveBeenCalledWith('testPassword', 10);
@@ -68,8 +75,8 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should handle password comparison workflow', async () => {
-      const bcrypt = require('bcryptjs');
-      const { comparePassword } = require('../services/authService');
+      const bcrypt = await import('bcryptjs');
+      const { comparePassword } = await import('../services/authService');
       
       const result = await comparePassword('plainPassword', 'hashedPassword');
       expect(bcrypt.compare).toHaveBeenCalledWith('plainPassword', 'hashedPassword');
@@ -91,13 +98,11 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should find user by email', async () => {
-      const pool = require('../config/database');
-      const { findUserByEmail } = require('../services/authService');
-      
-      pool.query.mockResolvedValue({ rows: [mockUser] });
-      
+      const poolModule = await import('../config/database');
+      const { findUserByEmail } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
       const result = await findUserByEmail('test@example.com');
-      
       expect(pool.query).toHaveBeenCalledWith(
         'SELECT * FROM users WHERE email = $1',
         ['test@example.com']
@@ -106,23 +111,20 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should return null when user not found by email', async () => {
-      const pool = require('../config/database');
-      const { findUserByEmail } = require('../services/authService');
-      
-      pool.query.mockResolvedValue({ rows: [] });
-      
+      const poolModule = await import('../config/database');
+      const { findUserByEmail } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [] });
       const result = await findUserByEmail('nonexistent@example.com');
       expect(result).toBeNull();
     });
 
     it('should find user by ID', async () => {
-      const pool = require('../config/database');
-      const { findUserById } = require('../services/authService');
-      
-      pool.query.mockResolvedValue({ rows: [mockUser] });
-      
+      const poolModule = await import('../config/database');
+      const { findUserById } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
       const result = await findUserById('user123');
-      
       expect(pool.query).toHaveBeenCalledWith(
         'SELECT * FROM users WHERE id = $1',
         ['user123']
@@ -131,9 +133,9 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should create new user', async () => {
-      const pool = require('../config/database');
-      const { createUser } = require('../services/authService');
-      
+      const poolModule = await import('../config/database');
+      const { createUser } = await import('../services/authService');
+      const pool = poolModule.default;
       const userData = {
         email: 'new@example.com',
         password: 'hashed-password',
@@ -142,7 +144,7 @@ describe('AuthService Basic Tests', () => {
       };
       
       const createdUser = { id: '123', ...userData };
-      pool.query.mockResolvedValue({ rows: [createdUser] });
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [createdUser] });
       
       const result = await createUser(userData);
       
@@ -154,15 +156,13 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should authenticate user with valid credentials', async () => {
-      const pool = require('../config/database');
-      const bcrypt = require('bcryptjs');
-      const { authenticateUser } = require('../services/authService');
-      
-      pool.query.mockResolvedValue({ rows: [mockUser] });
-      bcrypt.compare.mockResolvedValue(true);
-      
+      const poolModule = await import('../config/database');
+      const bcrypt = await import('bcryptjs');
+      const { authenticateUser } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       const result = await authenticateUser('test@example.com', 'correctPassword');
-      
       expect(pool.query).toHaveBeenCalledWith(
         'SELECT * FROM users WHERE email = $1',
         ['test@example.com']
@@ -172,48 +172,41 @@ describe('AuthService Basic Tests', () => {
     });
 
     it('should return null for invalid credentials', async () => {
-      const pool = require('../config/database');
-      const bcrypt = require('bcryptjs');
-      const { authenticateUser } = require('../services/authService');
-      
-      pool.query.mockResolvedValue({ rows: [mockUser] });
-      bcrypt.compare.mockResolvedValue(false);
-      
+      const poolModule = await import('../config/database');
+      const bcrypt = await import('bcryptjs');
+      const { authenticateUser } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       const result = await authenticateUser('test@example.com', 'wrongPassword');
       expect(result).toBeNull();
     });
 
     it('should handle database errors gracefully', async () => {
-      const pool = require('../config/database');
-      const { findUserByEmail } = require('../services/authService');
-      
-      pool.query.mockRejectedValue(new Error('Database connection failed'));
-      
+      const poolModule = await import('../config/database');
+      const { findUserByEmail } = await import('../services/authService');
+      const pool = poolModule.default;
+      (pool.query as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
       await expect(findUserByEmail('test@example.com')).rejects.toThrow('Database connection failed');
     });
   });
 
   describe('Token verification', () => {
-    it('should verify valid token', () => {
-      const jwt = require('jsonwebtoken');
-      const { verifyToken } = require('../services/authService');
-      
-      jwt.verify.mockReturnValue({ userId: 'user123' });
-      
+    it('should verify valid token', async () => {
+      const jwt = await import('jsonwebtoken');
+      const { verifyToken } = await import('../services/authService');
+      (jwt.verify as jest.Mock).mockReturnValue({ userId: 'user123' });
       const result = verifyToken('valid.token');
-      
       expect(jwt.verify).toHaveBeenCalledWith('valid.token', expect.any(String));
       expect(result).toEqual({ userId: 'user123' });
     });
 
-    it('should throw error for invalid token', () => {
-      const jwt = require('jsonwebtoken');
-      const { verifyToken } = require('../services/authService');
-      
-      jwt.verify.mockImplementation(() => {
+    it('should throw error for invalid token', async () => {
+      const jwt = await import('jsonwebtoken');
+      const { verifyToken } = await import('../services/authService');
+      (jwt.verify as jest.Mock).mockImplementation(() => {
         throw new Error('Invalid token');
       });
-      
       expect(() => verifyToken('invalid.token')).toThrow('Invalid token');
     });
   });
@@ -221,23 +214,21 @@ describe('AuthService Basic Tests', () => {
   describe('createUser logging', () => {
     it('should log user creation process', async () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-      
-      const pool = require('../config/database');
-      const { createUser } = require('../services/authService');
-      
+      const poolModule = await import('../config/database');
+      const { createUser } = await import('../services/authService');
+      const pool = poolModule.default;
       const userData = {
         email: 'new@example.com',
         password: 'hashed-password',
         name: 'New User',
         role: 'user'
       };
-
       const mockCreatedUser = {
         id: '123',
         ...userData
       };
 
-      pool.query.mockResolvedValue({ rows: [mockCreatedUser] });
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockCreatedUser] });
       
       await createUser(userData);
       

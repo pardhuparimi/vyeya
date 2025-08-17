@@ -5,7 +5,7 @@ import pool from '../config/database';
 
 describe('E2E Integration Tests', () => {
   let authToken: string;
-  let userId: string;
+  // let userId: string; // Removed unused variable
   let productId: string;
   
   // Database availability flag
@@ -20,7 +20,7 @@ describe('E2E Integration Tests', () => {
       
       // Clean up any existing test data
       await pool.query("DELETE FROM users WHERE email = 'e2e-test@example.com'");
-    } catch (error) {
+    } catch {
       isDatabaseAvailable = false;
       console.log('🟡 Database not available - E2E tests will run in degraded mode');
     }
@@ -63,7 +63,6 @@ describe('E2E Integration Tests', () => {
           
           // Store for subsequent tests
           authToken = response.body.token;
-          userId = response.body.user.id;
           
           console.log('✅ USER REGISTRATION SUCCESS:');
           console.log('  📧 Email:', response.body.user.email);
@@ -138,7 +137,8 @@ describe('E2E Integration Tests', () => {
         console.log('  📦 Total Products:', response.body.products.length);
         console.log('  💾 Real Database Query: Products fetched from PostgreSQL');
         if (response.body.products.length > 0) {
-          console.log('  🏪 Sample Products:', response.body.products.slice(0, 2).map((p: any) => ({ name: p.name, price: p.price })));
+          type Product = { name: string; price: number };
+          console.log('  🏪 Sample Products:', response.body.products.slice(0, 2).map((p: Product) => ({ name: p.name, price: p.price })));
         }
       } else {
         // Without database, should fail with proper error

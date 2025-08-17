@@ -10,14 +10,7 @@ jest.mock('../middleware/auth', () => ({
 
 import request from 'supertest';
 import express from 'express';
-import pool from '../config/database';
-import {
-  authenticateUser,
-  findUserByEmail,
-  createUser,
-  hashPassword,
-  generateToken
-} from '../services/authService';
+// ...existing code...
 
 describe('Auth Routes', () => {
   let app: express.Express;
@@ -38,30 +31,25 @@ describe('Auth Routes', () => {
     location: 'Test City'
   };
 
-  beforeEach(() => {
-    // Clear require cache for router and dependencies
+  beforeEach(async () => {
     jest.resetModules();
-    delete require.cache[require.resolve('../routes/auth')];
-    delete require.cache[require.resolve('../services/authService')];
-    delete require.cache[require.resolve('../config/database')];
-    
-    // Get the mocked functions
-    const authService = require('../services/authService');
+    // Use jest.requireMock for mocked modules
+    const authService = jest.requireMock('../services/authService');
     authenticateUser = authService.authenticateUser;
     findUserByEmail = authService.findUserByEmail;
     createUser = authService.createUser;
     hashPassword = authService.hashPassword;
     generateToken = authService.generateToken;
-    
-    const pool = require('../config/database');
-    poolQuery = pool.query;
-    
+
+    const poolModule = jest.requireMock('../config/database');
+    poolQuery = poolModule.query;
+
     app = express();
     app.use(express.json());
-    
+
     // Import the router after mocks are set
-    const { authRoutes } = require('../routes/auth');
-    app.use('/api/v1/auth', authRoutes);
+    const authRoutesModule = await import('../routes/auth');
+    app.use('/api/v1/auth', authRoutesModule.authRoutes);
   });
 
   afterEach(() => {

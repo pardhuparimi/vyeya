@@ -13,7 +13,6 @@ router.get('/', async (req, res) => {
       total: products.length
     });
   } catch (error) {
-    // Log database connection errors in development only
     if (process.env.NODE_ENV !== 'test') {
       console.error('Database error:', error);
     }
@@ -34,8 +33,7 @@ router.get('/search', async (req, res) => {
     
     const products = await ProductModel.search(q as string);
     res.json({ products });
-  } catch (error) {
-    console.error('Search error:', error);
+  } catch {
     res.status(500).json({ error: 'Search failed' });
   }
 });
@@ -45,8 +43,7 @@ router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const products = await ProductModel.findByUserId(req.user?.id || '');
     res.json(products);
-  } catch (error) {
-    console.error('Database error:', error);
+  } catch {
     res.status(500).json({ error: 'Failed to fetch your products' });
   }
 });
@@ -61,8 +58,7 @@ router.get('/:id', async (req, res) => {
     }
     
     res.json({ product });
-  } catch (error) {
-    console.error('Database error:', error);
+  } catch {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -86,8 +82,7 @@ router.post('/', authenticateToken, async (req, res) => {
     });
     
     res.status(201).json(product);
-  } catch (error) {
-    console.error('Database error:', error);
+  } catch {
     res.status(500).json({ error: 'Failed to create product' });
   }
 });
