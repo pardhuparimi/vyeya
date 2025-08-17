@@ -243,5 +243,57 @@ describe('AuthService Basic Tests', () => {
       
       consoleSpy.mockRestore();
     });
+
+    it('should handle authenticateUser when user is found but password is invalid', async () => {
+      const poolModule = await import('../config/database');
+      const bcrypt = await import('bcryptjs');
+      const { authenticateUser } = await import('../services/authService');
+      const pool = poolModule.default;
+      
+      const mockUser = {
+        id: 'user123',
+        email: 'test@example.com',
+        password: 'hashed-password',
+        name: 'Test User',
+        role: 'user'
+      };
+      
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false); // Invalid password
+      
+      const result = await authenticateUser('test@example.com', 'wrongPassword');
+      
+      expect(result).toBeNull();
+      expect(bcrypt.compare).toHaveBeenCalledWith('wrongPassword', 'hashed-password');
+    });
+
+    it('should handle authenticateUser when user is not found', async () => {
+      const poolModule = await import('../config/database');
+      const { authenticateUser } = await import('../services/authService');
+      const pool = poolModule.default;
+      
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [] }); // No user found
+      
+      const result = await authenticateUser('nonexistent@example.com', 'anyPassword');
+      
+      expect(result).toBeNull();
+    });
+
+    it('should handle findUserById when result.rows[0] is undefined', async () => {
+      const poolModule = await import('../config/database');
+      const { findUserById } = await import('../services/authService');
+      const pool = poolModule.default;
+      
+      // Mock a scenario where rows[0] is undefined (empty result set)
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [undefined] });
+      
+      const result = await findUserById('nonexistent-user-id');
+      
+      expect(result).toBeNull();
+      expect(pool.query).toHaveBeenCalledWith(
+        'SELECT * FROM users WHERE id = $1',
+        ['nonexistent-user-id']
+      );
+    });
   });
 });
