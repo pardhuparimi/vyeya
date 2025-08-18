@@ -226,15 +226,12 @@ jobs:
           export NODE_ENV=ci
           pnpm exec ts-node src/scripts/init-db.ts
           
-          # Build server before starting
-          pnpm build
-          
-          # Start server with proper environment (use 'ci' not 'test' so server actually starts)
+          # Start server with tsx directly (no build needed, more reliable)
           export POSTGRES_HOST=localhost POSTGRES_PORT=5433 POSTGRES_USER=test POSTGRES_PASSWORD=test POSTGRES_DB=vyeya_test
           export REDIS_URL=redis://localhost:6380
           export NODE_ENV=ci
           export PORT=3000
-          pnpm start > server.log 2>&1 &
+          pnpm dev > server.log 2>&1 &
           
           # Wait for server to be ready with better error handling
           echo "⏳ Waiting for backend server..."
