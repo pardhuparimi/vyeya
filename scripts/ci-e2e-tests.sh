@@ -62,44 +62,66 @@ fi
 cd ../..
 print_success "✅ Backend tests passed"
 
-# Step 2: Start Services
-print_info "🚀 Starting services..."
+# Step 2: Verify Services (CI services should already be running)
+print_info "🔍 Verifying backend services..."
 
-# Kill any existing processes
-pkill -f "tsx.*src/index.ts" || true
-pkill -f "react-native.*start" || true
-pkill -f "metro" || true
+# In CI, services should already be running, just verify
+if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    print_info "Running in CI environment - using existing services"
+    
+    # Verify backend is accessible
+    for i in {1..10}; do
+        if curl -s --max-time 5 http://localhost:3000/health > /dev/null 2>&1; then
+            print_success "✅ Backend server accessible"
+            break
+        fi
+        if [ $i -eq 10 ]; then
+            print_error "❌ Backend server not accessible in CI"
+            exit 1
+        fi
+        print_info "⏳ Waiting for backend... ($i/10)"
+        sleep 5
+    done
+else
+    # Local environment - start services
+    print_info "🚀 Starting services for local testing..."
 
-# Start backend
-cd packages/server
-NODE_ENV=test pnpm dev &
-BACKEND_PID=$!
-cd ../..
+    # Kill any existing processes
+    pkill -f "tsx.*src/index.ts" || true
+    pkill -f "react-native.*start" || true
+    pkill -f "metro" || true
 
-# Start Metro
-cd packages/app
-npx react-native start --reset-cache &
-METRO_PID=$!
-cd ../..
+    # Start backend
+    cd packages/server
+    NODE_ENV=test pnpm dev &
+    BACKEND_PID=$!
+    cd ../..
 
-print_info "⏳ Waiting for services to start..."
-sleep 10
+    # Start Metro
+    cd packages/app
+    npx react-native start --reset-cache &
+    METRO_PID=$!
+    cd ../..
 
-# Verify backend is running
-for i in {1..30}; do
-    if netstat -an | grep -q ":3000.*LISTEN"; then
-        print_success "✅ Backend server ready (listening on port 3000)"
-        break
-    fi
-    if [ $i -eq 30 ]; then
-        print_error "❌ Backend server failed to start"
-        # Try to get server logs
-        print_info "Server process status:"
-        ps aux | grep tsx || true
-        exit 1
-    fi
-    sleep 2
-done
+    print_info "⏳ Waiting for services to start..."
+    sleep 10
+
+    # Verify backend is running
+    for i in {1..30}; do
+        if netstat -an | grep -q ":3000.*LISTEN"; then
+            print_success "✅ Backend server ready (listening on port 3000)"
+            break
+        fi
+        if [ $i -eq 30 ]; then
+            print_error "❌ Backend server failed to start"
+            # Try to get server logs
+            print_info "Server process status:"
+            ps aux | grep tsx || true
+            exit 1
+        fi
+        sleep 2
+    done
+fi
 
 # Step 3: Setup Test Data
 print_info "📊 Setting up test data..."

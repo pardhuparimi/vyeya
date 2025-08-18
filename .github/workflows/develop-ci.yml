@@ -187,24 +187,60 @@ jobs:
       - name: Start Backend Services
         run: |
           echo "🚀 Starting backend services for mobile testing..."
+          
+          # Start PostgreSQL and Redis for mobile E2E tests
+          docker run -d --name postgres-mobile-test -p 5433:5432 \
+            -e POSTGRES_PASSWORD=test -e POSTGRES_USER=test -e POSTGRES_DB=vyeya_test \
+            postgres:16-alpine
+          
+          docker run -d --name redis-mobile-test -p 6380:6379 redis:7-alpine
+          
+          # Wait for services to be ready
+          echo "⏳ Waiting for database services..."
+          sleep 15
+          
+          # Verify PostgreSQL is ready
+          for i in {1..20}; do
+            if docker exec postgres-mobile-test pg_isready -U test -d vyeya_test; then
+              echo "✅ PostgreSQL ready"
+              break
+            fi
+            echo "⏳ Waiting for PostgreSQL... ($i/20)"
+            sleep 3
+          done
+          
           cd packages/server
           pnpm install --frozen-lockfile
           
-          # Initialize database
+          # Initialize database with correct environment
           export POSTGRES_HOST=localhost POSTGRES_PORT=5433 POSTGRES_USER=test POSTGRES_PASSWORD=test POSTGRES_DB=vyeya_test
+          export NODE_ENV=test
           pnpm exec ts-node src/scripts/init-db.ts
           
-          # Start server in background
-          export NODE_ENV=test
-          timeout 300s pnpm dev &
+          # Build server before starting
+          pnpm build
           
-          # Wait for server to be ready
+          # Start server with proper environment
+          export POSTGRES_HOST=localhost POSTGRES_PORT=5433 POSTGRES_USER=test POSTGRES_PASSWORD=test POSTGRES_DB=vyeya_test
+          export REDIS_URL=redis://localhost:6380
+          export NODE_ENV=test
+          export PORT=3000
+          pnpm start > server.log 2>&1 &
+          
+          # Wait for server to be ready with better error handling
+          echo "⏳ Waiting for backend server..."
           for i in {1..30}; do
-            if curl -f http://localhost:3000/health; then
+            if curl -s --max-time 5 http://localhost:3000/health > /dev/null 2>&1; then
               echo "✅ Backend server ready"
               break
             fi
             echo "⏳ Waiting for backend... ($i/30)"
+            if [ $i -eq 30 ]; then
+              echo "❌ Backend server failed to start"
+              echo "🔍 Server logs:"
+              cat server.log || echo "No server logs found"
+              exit 1
+            fi
             sleep 10
           done
       
@@ -217,6 +253,14 @@ jobs:
         run: |
           echo "📱 Running headless mobile E2E tests..."
           ./scripts/ci-e2e-tests.sh true
+      
+      - name: Cleanup Mobile Test Services
+        if: always()
+        run: |
+          echo "🧹 Cleaning up mobile test services..."
+          docker stop postgres-mobile-test redis-mobile-test 2>/dev/null || true
+          docker rm postgres-mobile-test redis-mobile-test 2>/dev/null || true
+          pkill -f "pnpm.*start" 2>/dev/null || true
           
       - name: Upload Test Results
         if: always()

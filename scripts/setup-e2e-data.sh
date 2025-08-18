@@ -33,22 +33,43 @@ print_info "🔄 Resetting E2E test data..."
 # Navigate to server directory
 cd "$(dirname "$0")/../packages/server"
 
-# Check if test database is available
-if ! docker exec postgres-e2e-test pg_isready -U postgres -d vyeya_e2e >/dev/null 2>&1; then
-    print_error "Test database is not ready. Please ensure Docker services are running."
-    exit 1
+# Check if test database is available - use CI-compatible container names
+if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    # In CI, use the mobile test database
+    if ! docker exec postgres-mobile-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
+        print_error "Test database is not ready. Please ensure Docker services are running."
+        exit 1
+    fi
+else
+    # Local environment
+    if ! docker exec postgres-e2e-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
+        print_error "Test database is not ready. Please ensure Docker services are running."
+        exit 1
+    fi
 fi
 
 print_info "📊 Clearing existing test data..."
 
-# Clear test database and recreate schema
-export NODE_ENV=development
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5433
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=postgres
-export POSTGRES_DB=vyeya_e2e
-export REDIS_URL=redis://localhost:6380
+# Set environment variables based on context
+if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    # CI environment configuration
+    export NODE_ENV=test
+    export POSTGRES_HOST=localhost
+    export POSTGRES_PORT=5433
+    export POSTGRES_USER=test
+    export POSTGRES_PASSWORD=test
+    export POSTGRES_DB=vyeya_test
+    export REDIS_URL=redis://localhost:6380
+else
+    # Local environment configuration
+    export NODE_ENV=development
+    export POSTGRES_HOST=localhost
+    export POSTGRES_PORT=5433
+    export POSTGRES_USER=test
+    export POSTGRES_PASSWORD=test
+    export POSTGRES_DB=vyeya_test
+    export REDIS_URL=redis://localhost:6380
+fi
 
 # Run database initialization script
 print_info "🗃️ Initializing test database schema..."
