@@ -68,6 +68,15 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
+      
+      - name: 🧹 Cleanup Quality Gate
+        if: always()
+        run: |
+          echo "🧹 Cleaning up Quality Gate resources..."
+          # Clean up any processes that might have been started
+          pkill -f "pnpm.*" 2>/dev/null || true
+          pkill -f "node.*" 2>/dev/null || true
+          echo "✅ Quality Gate cleanup completed"
 
   # Phase 2: Integration Tests using Docker
   integration-tests:
@@ -119,9 +128,16 @@ jobs:
             pnpm test:http --verbose
           "
       
-      - name: 🧹 Cleanup
+      - name: 🧹 Cleanup Integration Tests
         if: always()
-        run: docker compose -f docker-compose.ci.yml down -v
+        run: |
+          echo "🧹 Cleaning up Integration Tests resources..."
+          # Stop and remove all Docker containers and volumes
+          docker compose -f docker-compose.ci.yml down -v --remove-orphans 2>/dev/null || true
+          # Clean up any orphaned containers
+          docker container prune -f 2>/dev/null || true
+          docker volume prune -f 2>/dev/null || true
+          echo "✅ Integration Tests cleanup completed"
 
   # Phase 3: Mobile E2E Tests
   mobile-e2e-tests:
@@ -188,20 +204,13 @@ jobs:
         run: |
           echo "🚀 Starting backend services for mobile testing..."
           
-          # Start PostgreSQL and Redis for mobile E2E tests
-          docker run -d --name postgres-mobile-test -p 5433:5432 \
-            -e POSTGRES_PASSWORD=test -e POSTGRES_USER=test -e POSTGRES_DB=vyeya_test \
-            postgres:16-alpine
-          
-          docker run -d --name redis-mobile-test -p 6380:6379 redis:7-alpine
-          
-          # Wait for services to be ready
+          # Wait for GitHub Actions services to be ready
           echo "⏳ Waiting for database services..."
           sleep 15
           
-          # Verify PostgreSQL is ready
+          # Verify services are ready using GitHub Actions services
           for i in {1..20}; do
-            if docker exec postgres-mobile-test pg_isready -U test -d vyeya_test; then
+            if nc -z localhost 5433; then
               echo "✅ PostgreSQL ready"
               break
             fi
@@ -254,13 +263,20 @@ jobs:
           echo "📱 Running headless mobile E2E tests..."
           ./scripts/ci-e2e-tests.sh true
       
-      - name: Cleanup Mobile Test Services
+      - name: 🧹 Cleanup Mobile E2E Tests
         if: always()
         run: |
-          echo "🧹 Cleaning up mobile test services..."
+          echo "🧹 Cleaning up Mobile E2E Tests resources..."
+          # Stop backend server
+          pkill -f "pnpm.*start" 2>/dev/null || true
+          pkill -f "tsx.*src/index.ts" 2>/dev/null || true
+          # Clean up any additional Docker containers that might have been created
           docker stop postgres-mobile-test redis-mobile-test 2>/dev/null || true
           docker rm postgres-mobile-test redis-mobile-test 2>/dev/null || true
-          pkill -f "pnpm.*start" 2>/dev/null || true
+          # Clean up processes using our ports
+          lsof -ti:3000,5433,6380 | xargs kill -9 2>/dev/null || true
+          # The GitHub Actions services (postgres/redis) will be cleaned up automatically
+          echo "✅ Mobile E2E Tests cleanup completed"
           
       - name: Upload Test Results
         if: always()
