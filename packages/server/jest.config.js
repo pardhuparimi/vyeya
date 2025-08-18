@@ -16,6 +16,8 @@ module.exports = {
     '/src/scripts/',                    // Ignore database scripts
     '/__mocks__/',                      // Ignore mock files
   ],
+  // Ensure NODE_ENV is set to test
+  setupFiles: ['<rootDir>/jest.setup.js'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },

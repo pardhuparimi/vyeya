@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# CI/CD E2E Test Script - Headless Mode
-# This script runs E2E tests in headless mode suitable for CI/CD pipelines
+# CI/CD E2E Test Script - Mobile E2E Tests Only
+# This script runs ONLY mobile E2E tests in headless mode for CI/CD pipelines
+# Unit tests and integration tests should already be completed in earlier CI stages
 
 set -e
 
@@ -17,8 +18,8 @@ print_banner() {
     echo -e "${CYAN}"
     echo "████████████████████████████████████████████████████████████████████████████████"
     echo "█                                                                              █"
-    echo "█                     🤖 CI/CD E2E TEST AUTOMATION                            █"
-    echo "█                        Headless Mode for Pipelines                          █"
+    echo "█                     📱 MOBILE E2E TEST AUTOMATION                           █"
+    echo "█                        Cross-Platform Mobile Testing                        █"
     echo "█                                                                              █"
     echo "████████████████████████████████████████████████████████████████████████████████"
     echo -e "${NC}\n"
@@ -47,22 +48,7 @@ fi
 
 print_banner
 
-# Step 1: Backend Tests
-print_info "🧪 Running backend tests..."
-cd packages/server
-if ! pnpm test; then
-    print_error "Backend unit tests failed"
-    exit 1
-fi
-
-if ! pnpm test:integration; then
-    print_error "Backend integration tests failed"
-    exit 1
-fi
-cd ../..
-print_success "✅ Backend tests passed"
-
-# Step 2: Verify Services (CI services should already be running)
+# Step 1: Verify Services (CI services should already be running)
 print_info "🔍 Verifying backend services..."
 
 # In CI, services should already be running, just verify
@@ -123,12 +109,12 @@ else
     done
 fi
 
-# Step 3: Setup Test Data
+# Step 2: Setup Test Data
 print_info "📊 Setting up test data..."
 chmod +x scripts/setup-e2e-data.sh
 ./scripts/setup-e2e-data.sh
 
-# Step 4: Android Tests
+# Step 3: Android Tests
 print_info "🤖 Running Android E2E tests..."
 
 if [[ "$HEADLESS_MODE" == "true" ]]; then
@@ -186,7 +172,7 @@ done
 
 print_info "📊 Android Results: $ANDROID_PASSED passed, $ANDROID_FAILED failed"
 
-# Step 5: iOS Tests (macOS only)
+# Step 4: iOS Tests (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     print_info "🍎 Running iOS E2E tests..."
     

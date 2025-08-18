@@ -41,8 +41,8 @@ if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
         exit 1
     fi
 else
-    # Local environment
-    if ! docker exec postgres-e2e-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
+    # Local environment - use the correct container name from docker-compose.yml
+    if ! docker exec vyeya-postgres-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
         print_error "Test database is not ready. Please ensure Docker services are running."
         exit 1
     fi
@@ -53,7 +53,7 @@ print_info "📊 Clearing existing test data..."
 # Set environment variables based on context
 if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
     # CI environment configuration
-    export NODE_ENV=test
+    export NODE_ENV=ci
     export POSTGRES_HOST=localhost
     export POSTGRES_PORT=5433
     export POSTGRES_USER=test
