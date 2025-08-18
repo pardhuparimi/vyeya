@@ -79,7 +79,7 @@ else
 
     # Start backend
     cd packages/server
-    NODE_ENV=test pnpm dev &
+    NODE_ENV=ci pnpm dev &
     BACKEND_PID=$!
     cd ../..
 
