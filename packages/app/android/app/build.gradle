@@ -132,3 +132,28 @@ dependencies {
     androidTestImplementation('com.wix:detox:+')
     implementation 'androidx.appcompat:appcompat:1.6.1'
 }
+
+// Task to generate debug keystore if it doesn't exist
+task generateDebugKeystore(type: Exec) {
+    description = 'Generates debug keystore if it does not exist'
+    
+    def keystoreFile = file('debug.keystore')
+    onlyIf { !keystoreFile.exists() }
+    
+    commandLine 'keytool', '-genkey', '-v', '-keystore', 'debug.keystore', 
+                '-storepass', 'android', '-alias', 'androiddebugkey', 
+                '-keypass', 'android', '-keyalg', 'RSA', '-keysize', '2048', 
+                '-validity', '10000', '-dname', 'CN=Android Debug,O=Android,C=US'
+}
+
+// Make sure keystore is generated before any build tasks
+android.applicationVariants.all { variant ->
+    variant.outputs.all { output ->
+        def task = project.tasks.findByName("package${variant.name.capitalize()}")
+        if (task) {
+            task.dependsOn generateDebugKeystore
+        }
+    }
+}
+
+preBuild.dependsOn generateDebugKeystore

@@ -1,0 +1,107 @@
+# Fastlane configuration for Vyeya mobile app
+
+default_platform(:android)
+
+# Helper methods
+def ensure_debug_keystore
+  keystore_path = "android/app/debug.keystore"
+  
+  unless File.exist?(keystore_path)
+    UI.message("🔑 Generating Android debug keystore...")
+    sh("../../scripts/setup-android-keystore.sh")
+  else
+    UI.message("✅ Debug keystore already exists")
+  end
+end
+
+platform :android do
+  desc "Build debug APK for testing"
+  lane :build_debug do
+    ensure_debug_keystore
+    
+    gradle(
+      project_dir: "android",
+      task: "clean assembleDebug",
+      print_command: false
+    )
+  end
+
+  desc "Build and test Android app"
+  lane :test do
+    ensure_debug_keystore
+    
+    gradle(
+      project_dir: "android", 
+      task: "clean"
+    )
+    
+    gradle(
+      project_dir: "android",
+      task: "assembleDebug testDebugUnitTest",
+      print_command: false
+    )
+    
+    # Run E2E tests with Maestro
+    sh("cd .. && maestro test maestro/")
+  end
+
+  desc "Build and distribute to Firebase App Distribution"
+  lane :beta do
+    build_debug
+    
+    firebase_app_distribution(
+      app: ENV["FIREBASE_ANDROID_APP_ID"],
+      groups: "internal-testers",
+      release_notes: "Latest build from CI pipeline"
+    )
+    
+    slack(
+      message: "📱 New Android beta build available!",
+      channel: "#mobile-releases"
+    )
+  end
+end
+
+platform :ios do
+  desc "Build debug app for testing"
+  lane :build_debug do
+    build_app(
+      scheme: "vyeyamonorepo",
+      configuration: "Debug",
+      export_method: "development"
+    )
+  end
+
+  desc "Build and test iOS app"
+  lane :test do
+    run_tests(
+      workspace: "ios/vyeyamonorepo.xcworkspace",
+      scheme: "vyeyamonorepo",
+      device: "iPhone 15 Pro"
+    )
+    
+    build_debug
+    
+    # Run E2E tests with Maestro
+    sh("cd .. && maestro test maestro/")
+  end
+
+  desc "Build and distribute to TestFlight"
+  lane :beta do
+    match(type: "appstore")
+    
+    build_app(
+      scheme: "vyeyamonorepo",
+      configuration: "Release"
+    )
+    
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+    
+    slack(
+      message: "🍎 New iOS beta build uploaded to TestFlight!",
+      channel: "#mobile-releases"
+    )
+  end
+end

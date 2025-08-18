@@ -146,6 +146,11 @@ fi
 
 # Install Android app
 print_info "📦 Installing Android app..."
+
+# Ensure debug keystore exists
+print_info "🔑 Ensuring Android debug keystore exists..."
+"$PROJECT_ROOT/scripts/setup-android-keystore.sh"
+
 ANDROID_DIR="$PROJECT_ROOT/packages/app/android"
 
 if [[ ! -d "$ANDROID_DIR" ]]; then
