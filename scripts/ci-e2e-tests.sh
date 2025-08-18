@@ -14,6 +14,10 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Project paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 print_banner() {
     echo -e "${CYAN}"
     echo "████████████████████████████████████████████████████████████████████████████████"
@@ -78,16 +82,16 @@ else
     pkill -f "metro" || true
 
     # Start backend
-    cd packages/server
+    cd "$PROJECT_ROOT/packages/server"
     NODE_ENV=ci pnpm dev &
     BACKEND_PID=$!
-    cd ../..
+    cd "$PROJECT_ROOT"
 
     # Start Metro
-    cd packages/app
+    cd "$PROJECT_ROOT/packages/app"
     npx react-native start --reset-cache &
     METRO_PID=$!
-    cd ../..
+    cd "$PROJECT_ROOT"
 
     print_info "⏳ Waiting for services to start..."
     sleep 10
@@ -141,12 +145,29 @@ else
 fi
 
 # Install Android app
-cd packages/app/android
+print_info "📦 Installing Android app..."
+ANDROID_DIR="$PROJECT_ROOT/packages/app/android"
+
+if [[ ! -d "$ANDROID_DIR" ]]; then
+    print_error "Android directory not found: $ANDROID_DIR"
+    exit 1
+fi
+
+cd "$ANDROID_DIR"
+if [[ ! -f "./gradlew" ]]; then
+    print_error "gradlew not found in: $PWD"
+    ls -la
+    exit 1
+fi
+
+# Make gradlew executable
+chmod +x ./gradlew
 ./gradlew installCoreNativeDebug
-cd ../../..
+cd "$PROJECT_ROOT"
 
 # Run Android E2E tests
-cd packages/app
+APP_DIR="$PROJECT_ROOT/packages/app"
+cd "$APP_DIR"
 export PATH="$PATH:$HOME/.maestro/bin"
 
 ANDROID_TESTS=(
