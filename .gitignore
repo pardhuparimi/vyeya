@@ -60,8 +60,7 @@ packages/app/android/.gradle/
 packages/app/android/app/.cxx/
 packages/app/android/app/build/
 packages/app/android/build/
-packages/app/android/gradle/
-packages/app/android/gradlew*
+packages/app/android/.gradle/
 packages/app/android/local.properties
 *.apk
 *.aab
