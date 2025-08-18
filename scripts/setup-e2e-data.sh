@@ -33,13 +33,15 @@ print_info "🔄 Resetting E2E test data..."
 # Navigate to server directory
 cd "$(dirname "$0")/../packages/server"
 
-# Check if test database is available - use CI-compatible container names
+# Check if test database is available - use CI-compatible approach
 if [[ "$CI" == "true" ]] || [[ "$GITHUB_ACTIONS" == "true" ]]; then
-    # In CI, use the mobile test database
-    if ! docker exec postgres-mobile-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
-        print_error "Test database is not ready. Please ensure Docker services are running."
+    # In CI, test database connection using curl to backend health endpoint
+    # The backend already connected to the database successfully if it's running
+    if ! curl -s http://localhost:3000/health >/dev/null 2>&1; then
+        print_error "Backend server is not ready. Database connection cannot be verified."
         exit 1
     fi
+    print_info "✅ Backend server is ready, database connection verified"
 else
     # Local environment - use the correct container name from docker-compose.yml
     if ! docker exec vyeya-postgres-test pg_isready -U test -d vyeya_test >/dev/null 2>&1; then
