@@ -76,10 +76,6 @@ packages/app/android/local.properties
 *.keystore
 *.jks
 
-# Generated icons and assets
-packages/app/android/app/src/main/res/mipmap-*/
-packages/app/ios/Vyeya/Images.xcassets/
-
 # Xcode
 packages/app/ios/*.xcodeproj/xcuserdata/
 packages/app/ios/*.xcodeproj/project.xcworkspace/
