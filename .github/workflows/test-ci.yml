@@ -101,17 +101,23 @@ jobs:
           # List available iOS simulators
           xcrun simctl list devices available
           
-          # Create and boot iOS simulator (use iPhone 16 with latest iOS)
-          DEVICE_ID=$(xcrun simctl create "TestiPhone" "iPhone 16" "iOS-18.4" || echo "")
+          # Get an available iPhone 16 device ID (prefer existing over creating new)
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 (" | head -1 | grep -o -E '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+          
           if [ -n "$DEVICE_ID" ]; then
-            echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
-            xcrun simctl boot "$DEVICE_ID"
-          else
-            # Fallback to existing iPhone 16 device
-            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 (" | head -1 | grep -o -E '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+            echo "Using existing simulator: $DEVICE_ID"
             echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
             xcrun simctl boot "$DEVICE_ID" || true
+          else
+            # Create new iPhone 16 simulator if none exists
+            DEVICE_ID=$(xcrun simctl create "TestiPhone" "iPhone 16" | tr -d '\n')
+            echo "Created new simulator: $DEVICE_ID"
+            echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
+            xcrun simctl boot "$DEVICE_ID"
           fi
+          
+          # Wait for simulator to boot
+          timeout 60 bash -c 'until xcrun simctl list devices | grep "$0" | grep -q Booted; do sleep 1; done' "$DEVICE_ID"
       
       - name: 🎭 Install Maestro
         run: |
@@ -132,8 +138,8 @@ jobs:
           # Install iOS dependencies
           cd ios && pod install && cd ..
           
-          # Build for simulator (use iPhone 16 without --configuration flag)
-          npx react-native run-ios --simulator "iPhone 16" --no-packager
+          # Build for simulator using the available simulator ID
+          npx react-native run-ios --simulator "$SIMULATOR_ID" --no-packager
         env:
           RCT_NO_LAUNCH_PACKAGER: 1
       
@@ -240,8 +246,8 @@ jobs:
           # Wait for Metro to start
           sleep 30
           
-          # Build and install Android app (use correct variant)
-          npx react-native run-android --variant=coreNativeDebug --no-packager
+          # Build and install Android app (use correct variant syntax)
+          npx react-native run-android --mode=coreNativeDebug --no-packager
           
           # Wait for app to install
           sleep 10
