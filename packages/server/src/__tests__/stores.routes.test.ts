@@ -28,8 +28,9 @@ describe('Stores Routes', () => {
       // First, get the list of stores to get a valid ID
       const storesRes = await request(app).get('/api/v1/stores');
       
-      if (storesRes.body.stores.length > 0) {
-        const storeId = storesRes.body.stores[0].id;
+      const stores = storesRes.body.stores || storesRes.body || [];
+      if (stores.length > 0) {
+        const storeId = stores[0].id;
         
         const res = await request(app)
           .get(`/api/v1/stores/${storeId}`);
