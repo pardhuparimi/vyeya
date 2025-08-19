@@ -1,0 +1,26 @@
+name: 'Setup Fastlane'
+description: 'Sets up Ruby and Fastlane for mobile builds'
+inputs:
+  ruby-version:
+    description: 'Ruby version'
+    required: false
+    default: '3.0'
+  working-directory:
+    description: 'Working directory for Fastlane'
+    required: false
+    default: 'packages/app'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Ruby & Fastlane
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby-version }}
+        bundler-cache: true
+        working-directory: ${{ inputs.working-directory }}
+    
+    - name: Install Fastlane
+      shell: bash
+      run: |
+        cd ${{ inputs.working-directory }}
+        gem install fastlane

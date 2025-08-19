@@ -1,0 +1,12 @@
+name: 'Setup Test Database'
+description: 'Initializes test database for CI'
+runs:
+  using: 'composite'
+  steps:
+    - name: Initialize test database
+      shell: bash
+      run: |
+        cd packages/server
+        export POSTGRES_HOST=localhost POSTGRES_PORT=5433 POSTGRES_USER=test POSTGRES_PASSWORD=test POSTGRES_DB=vyeya_test
+        export NODE_ENV=test
+        pnpm exec ts-node src/scripts/init-db.ts

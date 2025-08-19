@@ -1,0 +1,29 @@
+name: 'Setup Android Environment'
+description: 'Sets up Java, Android SDK, and keystore'
+inputs:
+  java-version:
+    description: 'Java version'
+    required: false
+    default: '17'
+  api-level:
+    description: 'Android API level'
+    required: false
+    default: '34'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java-version }}
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ inputs.api-level }}
+        build-tools: 34.0.0
+    
+    - name: Generate Android Debug Keystore
+      shell: bash
+      run: ./scripts/setup-android-keystore.sh
