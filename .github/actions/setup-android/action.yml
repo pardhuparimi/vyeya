@@ -21,8 +21,13 @@ runs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: ${{ inputs.api-level }}
-        build-tools: 34.0.0
+        cmdline-tools-version: 9477386
+        accept-android-sdk-licenses: true
+        packages: |
+          platforms;android-${{ inputs.api-level }}
+          build-tools;34.0.0
+          platform-tools
+          emulator
     
     - name: Generate Android Debug Keystore
       shell: bash

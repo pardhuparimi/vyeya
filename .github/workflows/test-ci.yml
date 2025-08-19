@@ -148,14 +148,14 @@ jobs:
           # List available iOS simulators
           xcrun simctl list devices available
           
-          # Create and boot iOS simulator
-          DEVICE_ID=$(xcrun simctl create "TestiPhone" "iPhone 15" "iOS-17.2" || echo "")
+          # Create and boot iOS simulator (use iPhone 16 with latest iOS)
+          DEVICE_ID=$(xcrun simctl create "TestiPhone" "iPhone 16" "iOS-18.4" || echo "")
           if [ -n "$DEVICE_ID" ]; then
             echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
             xcrun simctl boot "$DEVICE_ID"
           else
-            # Fallback to existing device
-            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15" | head -1 | grep -o -E '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+            # Fallback to existing iPhone 16 device
+            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 (" | head -1 | grep -o -E '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
             echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
             xcrun simctl boot "$DEVICE_ID" || true
           fi
@@ -179,8 +179,8 @@ jobs:
           # Install iOS dependencies
           cd ios && pod install && cd ..
           
-          # Build for simulator
-          npx react-native run-ios --simulator "iPhone 15" --configuration Debug --no-packager
+          # Build for simulator (use iPhone 16)
+          npx react-native run-ios --simulator "iPhone 16" --configuration Debug --no-packager
         env:
           RCT_NO_LAUNCH_PACKAGER: 1
       
