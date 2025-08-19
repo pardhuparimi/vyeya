@@ -2,13 +2,13 @@
 // This file is temporarily simplified for build compatibility
 // Original AWS Cognito implementation needs proper setup
 
-export const signUp = (email: string, password: string, phone_number: string) => {
-  console.log('signUp not implemented yet', { email, password: '***', phone_number });
+export const signUp = (_email: string, _password: string, _phone_number: string) => {
+  // TODO: Implement AWS Cognito signUp
   return Promise.resolve({ user: null });
 };
 
-export const signIn = (email: string, password: string) => {
-  console.log('signIn not implemented yet', { email, password: '***' });
+export const signIn = (_email: string, _password: string) => {
+  // TODO: Implement AWS Cognito signIn
   return Promise.resolve({ user: null });
 };
 

@@ -27,7 +27,7 @@ const CartScreen = ({ navigation }: any) => {
         { text: 'View Orders', onPress: () => { clearCart(); navigation.navigate('Orders'); } },
         { text: 'OK', onPress: () => { clearCart(); navigation.goBack(); } }
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to place order. Please try again.');
     }
   };

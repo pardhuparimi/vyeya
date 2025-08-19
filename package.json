@@ -24,7 +24,7 @@
     "test:ci": "pnpm --filter server test:ci",
     "test:coverage": "pnpm -r test:coverage",
     "lint": "pnpm -r lint",
-    "lint:check": "pnpm -r lint",
+    "lint:check": "cd packages/server && pnpm run lint:strict && cd ../app && pnpm run lint",
     "lint:fix": "pnpm -r lint:fix",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",

@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Button, Alert } from 'react-native';
 import tw from 'twrnc';
 import ProductList from '../components/ProductList';
 import { IProduct } from '../../../shared/src';
 import { getProducts } from '../services/product.service';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 
 const ProduceDashboardScreen = ({ navigation }: any) => {
-  const { user, logout } = useAuth();
-  const { getItemCount } = useCart();
+  const { user: _user, logout: _logout } = useAuth();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

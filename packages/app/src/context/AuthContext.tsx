@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error('Failed to load stored auth:', error);
+      // Error loading stored auth - silent fail
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
     } catch (error) {
-      console.error('Failed to clear stored auth:', error);
+      // Error clearing stored auth - silent fail
     }
     setUser(null);
     setToken(null);

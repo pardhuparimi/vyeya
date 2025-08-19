@@ -2,9 +2,9 @@ name: 🚀 Vyeya Mobile CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]  # Allow both branches during transition
+    branches: [main]  # Only main branch for production pipeline
   pull_request:
-    branches: [main, develop]
+    branches: [main]
   release:
     types: [published]
 

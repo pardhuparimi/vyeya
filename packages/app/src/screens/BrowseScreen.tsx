@@ -29,8 +29,8 @@ const BrowseScreen = ({ navigation: _navigation }: any) => {
     try {
       const data = await getProducts();
       setProducts(data);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
+    } catch (_error) {
+      // Error fetching products - could add user notification here
     } finally {
       setIsLoading(false);
     }

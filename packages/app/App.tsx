@@ -5,7 +5,6 @@ import { NotificationProvider } from './src/context/NotificationContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 const App = () => {
-  console.log('🚀 Vyeya App Started Successfully!');
   return (
     <AuthProvider>
       <CartProvider>

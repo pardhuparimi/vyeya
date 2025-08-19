@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, FlatList } from 'react-native';
 import tw from 'twrnc';
 import { IProduct } from '../../../shared/src';

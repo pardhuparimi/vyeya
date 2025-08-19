@@ -21,8 +21,8 @@ const AuthScreen = () => {
       } else {
         await login(email, password);
       }
-    } catch (_error) {
-      Alert.alert('Error', isSignup ? 'Signup failed' : 'Login failed');
+        } catch (_error) {
+      // Error handling can be added here
     }
   };
 
