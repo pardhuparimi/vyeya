@@ -33,21 +33,39 @@ echo -e "${BLUE}📁 Repository: ${REPO}${NC}"
 # Configure main branch protection
 echo -e "${YELLOW}🛡️  Configuring main branch protection...${NC}"
 
+# Create the protection configuration JSON
+cat > /tmp/branch_protection.json << 'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["quality-gate", "integration-tests", "mobile-builds", "e2e-tests"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": true,
+    "require_last_push_approval": false
+  },
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": true,
+  "lock_branch": false,
+  "allow_fork_syncing": true
+}
+EOF
+
 gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "/repos/${REPO}/branches/main/protection" \
-  -f required_status_checks='{"strict":true,"contexts":["quality-gate","integration-tests","mobile-builds","e2e-tests"]}' \
-  -f enforce_admins=true \
-  -f required_pull_request_reviews='{"required_approving_review_count":1,"dismiss_stale_reviews":true,"require_code_owner_reviews":true,"require_last_push_approval":false}' \
-  -f restrictions=null \
-  -f allow_force_pushes=false \
-  -f allow_deletions=false \
-  -f block_creations=false \
-  -f required_conversation_resolution=true \
-  -f lock_branch=false \
-  -f allow_fork_syncing=true
+  --input /tmp/branch_protection.json
+
+# Clean up temp file
+rm -f /tmp/branch_protection.json
 
 echo -e "${GREEN}✅ Main branch protection configured successfully!${NC}"
 
