@@ -11,6 +11,14 @@ import { useCart } from '../context/CartContext';
 
 const Tab = createBottomTabNavigator();
 
+// Define tab icons outside of render to avoid re-creation
+const HomeIcon = () => <Text>🌱</Text>;
+const BrowseIcon = () => <Text>🛍️</Text>;
+const LocalIcon = () => <Text>🌿</Text>;
+const SearchIcon = () => <Text>🔍</Text>;
+const CartIcon = () => <Text>🛒</Text>;
+const ProfileIcon = () => <Text>👤</Text>;
+
 const TabNavigator = () => {
   const { getItemCount } = useCart();
 
@@ -20,7 +28,7 @@ const TabNavigator = () => {
         name="Home" 
         component={ProduceDashboardScreen}
         options={{
-          tabBarIcon: () => <Text>🌱</Text>,
+          tabBarIcon: HomeIcon,
           title: 'Fresh Produce'
         }}
       />
@@ -28,14 +36,14 @@ const TabNavigator = () => {
         name="Browse" 
         component={BrowseScreen}
         options={{
-          tabBarIcon: () => <Text>🛍️</Text>
+          tabBarIcon: BrowseIcon
         }}
       />
       <Tab.Screen 
         name="Local" 
         component={LocalProduceScreen}
         options={{
-          tabBarIcon: () => <Text>🌿</Text>,
+          tabBarIcon: LocalIcon,
           title: 'Local & Seasonal'
         }}
       />
@@ -43,14 +51,14 @@ const TabNavigator = () => {
         name="Search" 
         component={SearchScreen}
         options={{
-          tabBarIcon: () => <Text>🔍</Text>
+          tabBarIcon: SearchIcon
         }}
       />
       <Tab.Screen 
         name="Cart" 
         component={CartScreen}
         options={{
-          tabBarIcon: () => <Text>🛒</Text>,
+          tabBarIcon: CartIcon,
           tabBarBadge: getItemCount() > 0 ? getItemCount() : undefined
         }}
       />
@@ -58,7 +66,7 @@ const TabNavigator = () => {
         name="Profile" 
         component={ProfileScreen}
         options={{
-          tabBarIcon: () => <Text>👤</Text>
+          tabBarIcon: ProfileIcon
         }}
       />
     </Tab.Navigator>

@@ -21,8 +21,9 @@ const AuthScreen = () => {
       } else {
         await login(email, password);
       }
-        } catch (_error) {
-      // Error handling can be added here
+        } catch (error) {
+      // Error handling can be added here - using error instead of _error
+      console.log('Authentication error:', error);
     }
   };
 

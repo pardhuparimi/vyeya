@@ -24,8 +24,9 @@ const AddProductScreen = ({ navigation }: any) => {
       } as any); // Temporary type assertion
       Alert.alert('Success', 'Product added successfully');
       navigation.goBack();
-        } catch (_error) {
-      // Error handling can be added here
+        } catch (error) {
+      // Error handling can be added here - using error instead of _error
+      console.log('Add product error:', error);
     } finally {
       setIsLoading(false);
     }
