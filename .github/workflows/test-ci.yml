@@ -117,7 +117,14 @@ jobs:
           fi
           
           # Wait for simulator to boot
-          timeout 60 bash -c 'until xcrun simctl list devices | grep "$0" | grep -q Booted; do sleep 1; done' "$DEVICE_ID"
+          for i in {1..60}; do
+            if xcrun simctl list devices | grep "$DEVICE_ID" | grep -q Booted; then
+              echo "Simulator $DEVICE_ID is booted"
+              break
+            fi
+            echo "Waiting for simulator to boot... ($i/60)"
+            sleep 1
+          done
       
       - name: 🎭 Install Maestro
         run: |
