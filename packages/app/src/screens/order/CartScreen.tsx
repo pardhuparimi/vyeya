@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { createOrder } from '../services/order.service';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { createOrder } from '../../services/order.service';
 
 const CartScreen = ({ navigation }: any) => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { token } = useAuth();
 
   const handleCheckout = async () => {
     if (items.length === 0) {
@@ -22,7 +22,7 @@ const CartScreen = ({ navigation }: any) => {
         price: item.price
       }));
       
-      await createOrder(user?.token || '', orderItems, getTotalPrice());
+      await createOrder(token || '', orderItems, getTotalPrice());
       Alert.alert('Order Placed', 'Your order has been placed successfully!', [
         { text: 'View Orders', onPress: () => { clearCart(); navigation.navigate('Orders'); } },
         { text: 'OK', onPress: () => { clearCart(); navigation.goBack(); } }

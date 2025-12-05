@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const EditProfileScreen = ({ navigation }: any) => {
   const { user, updateProfile } = useAuth();

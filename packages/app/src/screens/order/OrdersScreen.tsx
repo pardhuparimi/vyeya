@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
-import { Order, getOrders } from '../services/order.service';
-import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { Order, getOrders } from '../../services/order.service';
+import { useAuth } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const OrdersScreen = ({ navigation }: any) => {
   const { token } = useAuth();

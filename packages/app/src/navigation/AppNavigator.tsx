@@ -5,14 +5,14 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import tw from 'twrnc';
 import 'react-native-screens/native-stack';
 import { useAuth } from '../context/AuthContext';
-import AuthScreen from '../screens/AuthScreen';
+import AuthScreen from '../screens/auth/AuthScreen';
 import TabNavigator from './TabNavigator';
-import AddProductScreen from '../screens/AddProductScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
-import MyProductsScreen from '../screens/MyProductsScreen';
-import ProductDetailsScreen from '../screens/ProductDetailsScreen';
-import OrdersScreen from '../screens/OrdersScreen';
-import GrowerProfileScreen from '../screens/GrowerProfileScreen';
+import AddProductScreen from '../screens/product/AddProductScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import MyProductsScreen from '../screens/product/MyProductsScreen';
+import ProductDetailsScreen from '../screens/product/ProductDetailsScreen';
+import OrdersScreen from '../screens/order/OrdersScreen';
+import GrowerProfileScreen from '../screens/profile/GrowerProfileScreen';
 
 const Stack = createStackNavigator();
 

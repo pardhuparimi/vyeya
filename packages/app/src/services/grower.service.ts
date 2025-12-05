@@ -1,4 +1,6 @@
-const API_URL = 'http://10.0.2.2:3000/api/v1';
+import { Config } from '../config';
+
+const { API_URL } = Config;
 
 export interface Grower {
   id: string;
@@ -16,6 +18,6 @@ export const getGrowerProfile = async (growerId: string): Promise<Grower> => {
     throw new Error('Failed to fetch grower profile');
   }
   
-  const data = await response.json();
-  return data.grower;
+  const result = await response.json();
+  return result.data.grower;
 };

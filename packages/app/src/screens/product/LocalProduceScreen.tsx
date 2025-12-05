@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
-import { IProduct } from '../../../shared/src';
-import { getProducts } from '../services/product.service';
-import ProductList from '../components/ProductList';
+import { IProduct } from '../../../../shared/src';
+import { getProducts } from '../../services/product.service';
+import ProductList from '../../components/ProductList';
 
 const LocalProduceScreen = ({ navigation }: any) => {
   const [products, setProducts] = useState<IProduct[]>([]);

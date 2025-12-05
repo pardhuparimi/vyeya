@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 import tw from 'twrnc';
-import { createProduct } from '../services/product.service';
+import { createProduct } from '../../services/product.service';
 
 const AddProductScreen = ({ navigation }: any) => {
 
@@ -13,7 +13,17 @@ const AddProductScreen = ({ navigation }: any) => {
   const handleAddProduct = async () => {
     setIsLoading(true);
     try {
-      await createProduct({ name, price: parseFloat(price), stock: parseInt(stock), store_id: '1', location: {}, category_id: '1' });
+      // TODO: Get actual user ID and location
+      // @ts-ignore - The backend expects store_id and category_id, but the shared types define userId and category
+      // We are sending what the backend expects.
+      await createProduct({
+        name,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        store_id: '1', // Hardcoded store ID for now
+        category_id: '1', // Hardcoded category ID for now
+        location: {}
+      });
       Alert.alert('Success', 'Product added successfully');
       navigation.goBack();
     } catch (error) {

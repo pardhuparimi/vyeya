@@ -35,14 +35,19 @@ This is the mobile frontend for Vyeya, built with React Native and TypeScript. I
 ```
 src/
 ├── components/          # Reusable UI components
+│   ├── common/          # Shared atomic components (LoadingSpinner, ErrorMessage)
 │   └── ProductList.tsx  # Product listing component
 ├── navigation/          # Navigation configuration
 │   └── AppNavigator.tsx # Main app navigator
-├── screens/            # Screen components
-│   ├── SellerDashboardScreen.tsx
-│   └── AddProductScreen.tsx
-└── services/           # API services
-    └── product.service.ts
+├── screens/             # Screen components (Organized by feature)
+│   ├── auth/            # Authentication screens (Login, Signup)
+│   ├── product/         # Product-related screens (Browse, Details, Add)
+│   ├── order/           # Order & Cart screens
+│   └── profile/         # User & Seller profile screens
+├── services/            # API services
+│   └── product.service.ts
+├── context/             # Global state (Auth, Cart)
+└── config.ts            # App configuration (API URLs)
 ```
 
 ## Getting Started
@@ -108,22 +113,31 @@ The app uses React Navigation with a stack navigator:
 
 ```
 AppNavigator
-├── SellerDashboard (Initial Route)
-└── AddProduct
+├── Auth (Login/Signup)
+├── TabNavigator (Main App)
+│   ├── Home (Browse)
+│   ├── Search
+│   ├── Cart
+│   ├── Profile
+│   └── Dashboard (Seller)
+└── ProductDetails
 ```
 
-### Screen Components
+### Configuration
 
-#### SellerDashboardScreen
-- Main dashboard for sellers
-- Displays product list
-- Navigation to add product screen
-- Fetches products from API
+The application uses `src/config.ts` to manage environment-specific variables.
 
-#### AddProductScreen
-- Form to add new products
-- Input validation
-- API integration for product creation
+```typescript
+// packages/app/src/config.ts
+export const Config = {
+  // Update this URL based on your environment (Emulator, Simulator, Device)
+  API_URL: process.env.API_URL || 'http://10.0.2.2:3000/api/v1',
+};
+```
+
+To change the API URL for development (e.g., testing on a physical device):
+1. Open `packages/app/src/config.ts`
+2. Update the `API_URL` to your machine's local IP address (e.g., `http://192.168.1.100:3000/api/v1`)
 
 ### Services
 
