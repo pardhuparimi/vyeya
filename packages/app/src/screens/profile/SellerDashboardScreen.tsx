@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Alert, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
-import ProductList from '../components/ProductList';
-import { IProduct } from '../../../shared/src';
-import { getProducts } from '../services/product.service';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
+import ProductList from '../../components/ProductList';
+import { IProduct } from '../../../../shared/src';
+import { getProducts } from '../../services/product.service';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 const ProduceDashboardScreen = ({ navigation }: any) => {
   const { user, logout } = useAuth();

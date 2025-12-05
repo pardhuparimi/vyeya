@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, FlatList } from 'react-native';
 import tw from 'twrnc';
-import { IProduct } from '../../../shared/src';
-import { searchProducts } from '../services/product.service';
+import { IProduct } from '../../../../shared/src';
+import { searchProducts } from '../../services/product.service';
 
 const SearchScreen = ({ navigation }: any) => {
   const [searchQuery, setSearchQuery] = useState('');

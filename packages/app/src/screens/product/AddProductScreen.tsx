@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 import tw from 'twrnc';
-import { createProduct } from '../services/product.service';
+import { createProduct } from '../../services/product.service';
 
 const AddProductScreen = ({ navigation }: any) => {
 

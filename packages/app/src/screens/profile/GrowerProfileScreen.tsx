@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Linking } from 'react-native';
 import tw from 'twrnc';
-import { IProduct } from '../../../shared/src';
-import { getProducts } from '../services/product.service';
-import { getGrowerProfile, Grower } from '../services/grower.service';
-import ProductList from '../components/ProductList';
+import { IProduct } from '../../../../shared/src';
+import { getProducts } from '../../services/product.service';
+import { getGrowerProfile, Grower } from '../../services/grower.service';
+import ProductList from '../../components/ProductList';
 
 const GrowerProfileScreen = ({ route, navigation }: any) => {
   const { growerId } = route.params;

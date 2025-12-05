@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { createOrder } from '../services/order.service';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { createOrder } from '../../services/order.service';
 
 const CartScreen = ({ navigation }: any) => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();

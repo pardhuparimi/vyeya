@@ -1,12 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
-import ProduceDashboardScreen from '../screens/SellerDashboardScreen';
-import BrowseScreen from '../screens/BrowseScreen';
-import SearchScreen from '../screens/SearchScreen';
-import CartScreen from '../screens/CartScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import LocalProduceScreen from '../screens/LocalProduceScreen';
+import ProduceDashboardScreen from '../screens/profile/SellerDashboardScreen';
+import BrowseScreen from '../screens/product/BrowseScreen';
+import SearchScreen from '../screens/product/SearchScreen';
+import CartScreen from '../screens/order/CartScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import LocalProduceScreen from '../screens/product/LocalProduceScreen';
 import { useCart } from '../context/CartContext';
 
 const Tab = createBottomTabNavigator();
