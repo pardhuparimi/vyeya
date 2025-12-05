@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc';
-import { IProduct } from '../../../shared/src';
-import { useAuth } from '../context/AuthContext';
-import { getMyProducts } from '../services/product.service';
+import { IProduct } from '../../../../shared/src';
+import { useAuth } from '../../context/AuthContext';
+import { getMyProducts } from '../../services/product.service';
 
 const MyProductsScreen = ({ navigation }: any) => {
   const { user, token } = useAuth();

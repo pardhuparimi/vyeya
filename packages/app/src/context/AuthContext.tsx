@@ -1,15 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  name: string;
-}
+import { IUser } from '../../../shared/src';
 
 interface AuthContextType {
-  user: User | null;
+  user: IUser | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, role?: string) => Promise<void>;
@@ -21,7 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,13 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        setToken(data.token);
+        const result = await response.json();
+        const { user, token } = result.data;
+        setUser(user);
+        setToken(token);
         
         // Store in AsyncStorage
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('user', JSON.stringify(user));
       } else {
         throw new Error('Login failed');
       }
@@ -80,15 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        setToken(data.token);
+        const result = await response.json();
+        const { user, token } = result.data;
+        setUser(user);
+        setToken(token);
         
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('user', JSON.stringify(user));
       } else {
-        const error = await response.json();
-        throw new Error(error.error || 'Signup failed');
+        const result = await response.json();
+        throw new Error(result.error || 'Signup failed');
       }
     } finally {
       setIsLoading(false);
@@ -120,9 +116,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error('Update failed');
     }
 
-    const data = await response.json();
-    setUser(data.user);
-    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    const result = await response.json();
+    const { user } = result.data;
+    setUser(user);
+    await AsyncStorage.setItem('user', JSON.stringify(user));
   };
 
   return (
