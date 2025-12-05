@@ -16,6 +16,6 @@ export const getGrowerProfile = async (growerId: string): Promise<Grower> => {
     throw new Error('Failed to fetch grower profile');
   }
   
-  const data = await response.json();
-  return data.grower;
+  const result = await response.json();
+  return result.data.grower;
 };

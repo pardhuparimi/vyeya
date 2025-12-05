@@ -7,8 +7,8 @@ export const getProducts = async (): Promise<IProduct[]> => {
   if (!response.ok) {
     throw new Error('Failed to fetch products');
   }
-  const data = await response.json();
-  return data.products;
+  const result = await response.json();
+  return result.data.products;
 };
 
 export const createProduct = async (product: Omit<IProduct, 'id'>): Promise<IProduct> => {
@@ -22,7 +22,8 @@ export const createProduct = async (product: Omit<IProduct, 'id'>): Promise<IPro
   if (!response.ok) {
     throw new Error('Failed to create product');
   }
-  return response.json();
+  const result = await response.json();
+  return result.data;
 };
 
 export const getProductById = async (id: number): Promise<IProduct> => {
@@ -30,8 +31,8 @@ export const getProductById = async (id: number): Promise<IProduct> => {
   if (!response.ok) {
     throw new Error('Failed to fetch product');
   }
-  const data = await response.json();
-  return data.product;
+  const result = await response.json();
+  return result.data.product;
 };
 
 export const searchProducts = async (query: string): Promise<IProduct[]> => {
@@ -39,8 +40,8 @@ export const searchProducts = async (query: string): Promise<IProduct[]> => {
   if (!response.ok) {
     throw new Error('Failed to search products');
   }
-  const data = await response.json();
-  return data.products;
+  const result = await response.json();
+  return result.data.products;
 };
 
 export const getMyProducts = async (token: string): Promise<IProduct[]> => {
@@ -52,6 +53,6 @@ export const getMyProducts = async (token: string): Promise<IProduct[]> => {
   if (!response.ok) {
     throw new Error('Failed to fetch my products');
   }
-  const data = await response.json();
-  return data.products;
+  const result = await response.json();
+  return result.data.products;
 };
