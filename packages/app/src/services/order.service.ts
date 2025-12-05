@@ -31,8 +31,8 @@ export const createOrder = async (token: string, items: any[], totalAmount: numb
     throw new Error('Failed to create order');
   }
   
-  const data = await response.json();
-  return data.order;
+  const result = await response.json();
+  return result.data.order;
 };
 
 export const getOrders = async (token: string): Promise<Order[]> => {
@@ -46,8 +46,8 @@ export const getOrders = async (token: string): Promise<Order[]> => {
     throw new Error('Failed to fetch orders');
   }
   
-  const data = await response.json();
-  return data.orders;
+  const result = await response.json();
+  return result.data.orders;
 };
 
 export const getOrderById = async (token: string, orderId: string): Promise<Order> => {
@@ -61,6 +61,6 @@ export const getOrderById = async (token: string, orderId: string): Promise<Orde
     throw new Error('Failed to fetch order');
   }
   
-  const data = await response.json();
-  return data.order;
+  const result = await response.json();
+  return result.data.order;
 };
